@@ -97,9 +97,8 @@ def toggle_active_links(pathname):
 """
 
 
-
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.server.run(debug=True, threaded=True)
+
 
 

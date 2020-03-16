@@ -1,1 +1,1 @@
-web: gunicorn python index.py --timeout 300
+web: gunicorn index:server --timeout 300
