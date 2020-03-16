@@ -13,8 +13,6 @@ dash-table==4.6.0
 enum34==1.1.6
 Flask==1.1.1
 Flask-Compress==1.4.0
-future==0.17.1
-futures==3.3.0
 gunicorn==19.10.0
 ipaddress==1.0.22
 itsdangerous==1.1.0
