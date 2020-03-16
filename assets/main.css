@@ -1,23 +1,22 @@
-body {
+background-color:#92a8d1;
+
+.body {
     margin: 1rem;
+    background-color:#ff0000;
 }
 
-.title {
-    margin: 0 1rem 0 1rem;
+
+
+header{
+  align-items: right;
+  justify: right;
 }
 
-.row {
-    margin: 5rem 2rem 5rem 2rem;
-}
 
-.row p {
-    margin: 1rem 0 1rem 0;
-}
+.navbar{
+background-color:pink;
+color:green;
+.navbar-expand-xl|lg|md|sm;
 
-.details {
-    margin: 2rem;
-}
 
-.Select.is-open {
-    z-index: 1003;
 }

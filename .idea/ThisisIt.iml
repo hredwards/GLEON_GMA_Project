@@ -6,5 +6,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Original Dash and Oil Code" />
+    <orderEntry type="module" module-name="GLEON-GMA-master" />
   </component>
 </module>

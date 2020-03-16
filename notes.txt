@@ -1,0 +1,30 @@
+Home Page
+- Graphs, most difficult — hold off for a bit
+
+About
+- just a simple about page with a redirect to GLEON site
+
+Data 
+- where people can download data—hold off until database is done
+
+Contact
+- simple contact page
+
+Login
+- where users will login and upload, waiting on DB
+
+Upload 
+- separate page, only accessible by people logged in —waiting on DB
+- look up how to only redirect people logged in?? Right now it's just a path, has to be a better way for users -- DB
+
+
+
+
+
+
+Notes:
+All pages are named PageDetail; this is to make them group together in PyCharm easier to make it less cluttered
+
+
+Example of Redirect Button:
+dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),

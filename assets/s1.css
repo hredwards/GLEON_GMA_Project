@@ -182,7 +182,7 @@ body {
 }
 
 #header {
-  align-items: center;
+  align-items: right;
 }
 
 #learnMore {
@@ -217,7 +217,11 @@ body {
   height: 100%;
 }
 
-
+#navBar{
+list-style:none;
+margin:0;
+padding:0;
+}
 
 
 #rightCol {
@@ -430,7 +434,7 @@ ul {
 ol {
   list-style: decimal inside; }
 ol, ul {
-  padding-left: 0;
+  padding-left: 60px;
   margin-top: 0; }
 ul ul,
 ul ol,
