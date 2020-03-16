@@ -2,7 +2,6 @@ altgraph==0.10.2
 asn1crypto==0.24.0
 backports-abc==0.5
 bdist-mpkg==0.5.0
-bonjour-py==0.3
 cffi==1.12.2
 Click==7.0
 cryptography==2.6.1
