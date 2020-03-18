@@ -6,16 +6,13 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import dash_bootstrap_components as dbc
-from PageHomepage import Homepage
-from PageAbout import About
-from PageData import Data
-from PageContact import Contact
-from PageLogin import Login
-from PageUpload import Upload
+from Homepage import Homepage
+from About import About
+from Data import Data
+from Contact import Contact
+from Login import Login
+from Upload import Upload
 from navbar import NavBar
-import gunicorn
-
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
