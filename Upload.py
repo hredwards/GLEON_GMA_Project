@@ -16,7 +16,6 @@ body = dbc.Container(
 
 def Upload():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ])
     return layout

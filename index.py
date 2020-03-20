@@ -14,6 +14,8 @@ from Login import Login
 from Upload import Upload
 from navbar import NavBar
 
+
+
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
 
@@ -26,7 +28,7 @@ server = app.server
 
 
 app.layout = html.Div([
-    dcc.Location(id = 'url', refresh = False),
+    dcc.Location(id = 'url', refresh = True),
     NavBar(),
     html.Div(id = 'page-content')
 ],
@@ -61,7 +63,25 @@ def display_page(pathname):
 
 
 
-
+@app.callback(
+    [Output(f"page-{i}-link", "active") for i in range(1, 6)],
+    [Input("url", "pathname")],
+)
+def toggle_active_links(pathname):
+    if pathname == "/PageHomepage":
+        return True, False, False, False, False
+    elif pathname == "/":
+        return True, False, False, False, False
+    elif pathname == "/PageAbout":
+        return False, True, False, False, False
+    elif pathname == "/PageData":
+        return False, False, True, False, False
+    elif pathname == "/PageContact":
+        return False, False, False, True, False
+    elif pathname == "/PageLogin":
+        return False, False, False, False, True
+    else:
+        return False, False, False, False, False
 
 
 

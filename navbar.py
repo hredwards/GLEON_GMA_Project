@@ -1,11 +1,5 @@
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-import dash
-
-
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
-
-
 
 
 """
@@ -20,7 +14,6 @@ def NavBar():
         ],
         pills=True,
         className="navbar navbar-expand",
-        style={"background-color":"rgba(51, 204, 255, .1)"}
     )
     return NavBar
 

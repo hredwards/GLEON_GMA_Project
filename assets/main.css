@@ -13,10 +13,12 @@ header{
 }
 
 
-.navbar{
-background-color:pink;
+.navbar {
+background-color:rgba(51, 204, 255, .1)!important;
 color:green;
 .navbar-expand-xl|lg|md|sm;
 
 
 }
+
+a.active.nav-link{background-color:rgb(0, 153, 51)!important;}

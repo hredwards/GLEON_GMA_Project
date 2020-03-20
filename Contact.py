@@ -17,7 +17,6 @@ body = dbc.Container(
 
 def Contact():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ])
     return layout

@@ -59,9 +59,12 @@ html.A(html.Button("About", id="aboutPage"),
 
 def Homepage():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ],
     )
     return layout
 
+HomeLayout = html.Div([
+        body
+    ],
+    )

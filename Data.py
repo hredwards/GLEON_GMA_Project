@@ -14,7 +14,6 @@ body = dbc.Container(
 
 def Data():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ])
     return layout

@@ -57,9 +57,10 @@ className="mt-4",
 
 def About():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ])
     return layout
 
-
+AboutLayout = html.Div([
+        body
+    ])

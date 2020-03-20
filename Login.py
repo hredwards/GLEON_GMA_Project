@@ -18,7 +18,6 @@ body = dbc.Container(
 
 def Login():
     layout = html.Div([
-        dcc.Location(id="url"),
         body
     ])
     return layout
