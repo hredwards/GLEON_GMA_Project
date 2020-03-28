@@ -38,6 +38,7 @@ external_stylesheets = ['/assets/main.css']
 app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
 server = app.server
 
+application=app
 
 empty_df = pd.DataFrame()
 
@@ -104,32 +105,6 @@ def toggle_active_links(pathname):
         return False, False, False, False, False
 
 
-
-""""
-This sets which page is active based on the URL. This i
-"""
-
-""""Commenting out until I can fix constant refresh
-@app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 6)],
-    [Input("url", "pathname")],
-)
-def toggle_active_links(pathname):
-    if pathname == "/PageHomepage":
-        return True, False, False, False, False
-    elif pathname == "/":
-        return True, False, False, False, False
-    elif pathname == "/PageAbout":
-        return False, True, False, False, False
-    elif pathname == "/PageData":
-        return False, False, True, False, False
-    elif pathname == "/PageContact":
-        return False, False, False, True, False
-    elif pathname == "/PageLogin":
-        return False, False, False, False, True
-    else:
-        return False, False, False, False, False
-"""
 
 
 if __name__ == '__main__':
