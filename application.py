@@ -7,13 +7,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 from dash.dependencies import Input, Output
-from app.Homepage import Homepage
-from app.About import About
-from app.Data import Data
-from app.Contact import Contact
-from app.Login import Login
-from app.Upload import Upload
-from app.navbar import NavBar
+from Homepage import Homepage
+from About import About
+from Data import Data
+from Contact import Contact
+from Login import Login
+from Upload import Upload
+from navbar import NavBar
 
 """"
 This connects the application.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
