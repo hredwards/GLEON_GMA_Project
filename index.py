@@ -1,10 +1,11 @@
 """"
-This file contains all app callbacks and pathname redirects. This is the app that is ran to start the server
+This file contains all app callbacks and pathname redirects. This is the app that is ran to start the server as defined in the procfile
 """
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import pandas as pd
 from dash.dependencies import Input, Output
 from Homepage import Homepage
 from About import About
@@ -13,18 +14,31 @@ from Contact import Contact
 from Login import Login
 from Upload import Upload
 from navbar import NavBar
+import boto
+
+""""
+This connects the index.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
+from Heroku's web app, they are already linked for this project
+"""
+import os
+from boto.s3.connection import S3Connection
+s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
+""""
+This defines the css file(s) to be used and defines the app and server. It also establishes an empty dataframe and the app layout.
+The app layout pulls the URL/pathname and the display_page app callback below loads the page layout based on this URL
+"""
 
 external_stylesheets = ['/assets/main.css']
 app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
 server = app.server
 
 
-#app.config.suppress_callback_exceptions = True
+empty_df = pd.DataFrame()
 
 
 app.layout = html.Div([
@@ -61,7 +75,12 @@ def display_page(pathname):
         return Homepage()
 
 
-
+""""
+This Callback just uses the url/pathname to determine which page is active.
+Right now, the only place this is used is in navbar.py to determine the active page.
+The active page is then set to have a 'pill' in the nav bar. This is just the box behind the nav link indicating 
+which page you are on
+"""
 
 @app.callback(
     [Output(f"page-{i}-link", "active") for i in range(1, 6)],
@@ -86,9 +105,7 @@ def toggle_active_links(pathname):
 
 
 """"
-This sets which page is active based on the URL. This is used in navbar.py to determine the active page.
-The active page is then set to have a 'pill' in the nav bar. This is just the box behind the nav link indicating 
-which page you are on
+This sets which page is active based on the URL. This i
 """
 
 """"Commenting out until I can fix constant refresh

@@ -2,17 +2,37 @@
 This will have the data dictionaries for any filters we may use on the app. 
 """""
 
+masterFile = "data/MasterData.csv"
+
+
 ## Date??
 # Look into further, should be able to use built in tools as filter for this
-
+month_Controls = dict(
+    Jan="January",
+    Feb="February",
+    Mar="March",
+    Apr="April",
+    May="May",
+    Jun="June",
+    Jul="July",
+    Aug="August",
+    Sep="September",
+    Oct="October",
+    Nov="November",
+    Dec="December",
+)
 
 
 ## Geographic filters
 # These aren't complete, need to look at all avail data first and try to scrape it/export necessary stuff
 
-LAKES = {
-    'LakeID': "LakeName",
-}
+#LAKES = {
+ #   'LakeID': "LakeName",
+#}
+
+from LakeIDGenerator import lakeNameandID
+
+LAKES=lakeNameandID
 
 COUNTRIES = dict(
     USA = "USA",
@@ -20,6 +40,19 @@ COUNTRIES = dict(
 )
 
 # Province and Region -- research further, can this be pulled from LAT/LONG? easily?
+
+# PROVINCES = dict(
+#     USA = "USA",
+#     EU = "Europe",
+# )
+#
+# REGIONS = dict(
+#     USA = "USA",
+#     EU = "Europe",
+# )
+
+
+
 
 ## Methods
 

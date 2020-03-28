@@ -13,7 +13,7 @@ def NavBar():
             NavigationLinks,
         ],
         pills=True,
-        className="navbar navbar-expand",
+        className="navbar navbar-default",
     )
     return NavBar
 
@@ -25,7 +25,7 @@ PhotoForNavBar = "https://gleon.org/sites/default/files/images/Logo1.JPG"
 NavPhoto =html.A(
         dbc.Row(
             [
-                dbc.Col((html.Img(src=PhotoForNavBar, height="125px")), className='nav navbar-nav'),
+                dbc.Col((html.Img(src=PhotoForNavBar, height="125px"))),
             ],
         ),
         href="https://gleon.org/research/projects/global-microcystin-aggregation-gma"
@@ -34,9 +34,9 @@ NavPhoto =html.A(
 
 NavTitle = dbc.Row(
     [
-        html.A("GLEON GMA Project", href="/PageHomepage", style={'text-align':'center', 'color':'#000066', 'font-size':'30px'}),
+        html.A("GLEON GMA Project", href="/PageHomepage", style={'color':'#000066', 'font-size':'30px'}),
     ],
-    className="col-6 col-offset-2",
+    className="col-4 col-offset-2",
     align="center",
     justify=True,
     no_gutters=True,
