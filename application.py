@@ -35,15 +35,15 @@ The app layout pulls the URL/pathname and the display_page app callback below lo
 """
 
 external_stylesheets = ['/assets/main.css']
-application = dash.Dash(__name__, external_stylesheets= external_stylesheets)
-server = application.server
+app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
+application = app.server
 
 
 
 empty_df = pd.DataFrame()
 
 
-application.layout = html.Div([
+app.layout = html.Div([
     dcc.Location(id = 'url', refresh = True),
     NavBar(),
     html.Div(id = 'page-content')
@@ -56,7 +56,7 @@ This returns the page layout based on pathname; these are all defined in their r
 """
 
 
-@application.callback(Output('page-content', 'children'),
+@app.callback(Output('page-content', 'children'),
             [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/PageHomepage':
@@ -84,7 +84,7 @@ The active page is then set to have a 'pill' in the nav bar. This is just the bo
 which page you are on
 """
 
-@application.callback(
+@app.callback(
     [Output(f"page-{i}-link", "active") for i in range(1, 6)],
     [Input("url", "pathname")],
 )
@@ -108,7 +108,7 @@ def toggle_active_links(pathname):
 
 
 if __name__ == '__main__':
-    server.run(debug=True, threaded=True)
+    application.run(debug=True, threaded=True)
 
 
 
