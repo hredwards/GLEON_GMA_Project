@@ -56,7 +56,7 @@ This returns the page layout based on pathname; these are all defined in their r
 """
 
 
-@app.callback(Output('page-content', 'children'),
+@application.callback(Output('page-content', 'children'),
             [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/PageHomepage':
@@ -84,7 +84,7 @@ The active page is then set to have a 'pill' in the nav bar. This is just the bo
 which page you are on
 """
 
-@app.callback(
+@application.callback(
     [Output(f"page-{i}-link", "active") for i in range(1, 6)],
     [Input("url", "pathname")],
 )
