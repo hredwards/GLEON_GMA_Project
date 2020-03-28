@@ -35,15 +35,15 @@ The app layout pulls the URL/pathname and the display_page app callback below lo
 """
 
 external_stylesheets = ['/assets/main.css']
-app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
-server = app.server
+application = dash.Dash(__name__, external_stylesheets= external_stylesheets)
+server = application.server
 
-application=app
+
 
 empty_df = pd.DataFrame()
 
 
-app.layout = html.Div([
+application.layout = html.Div([
     dcc.Location(id = 'url', refresh = True),
     NavBar(),
     html.Div(id = 'page-content')
@@ -108,7 +108,7 @@ def toggle_active_links(pathname):
 
 
 if __name__ == '__main__':
-    app.server.run(debug=True, threaded=True)
+    application.server.run(debug=True, threaded=True)
 
 
 
