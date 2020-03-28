@@ -14,15 +14,16 @@ from Contact import Contact
 from Login import Login
 from Upload import Upload
 from navbar import NavBar
-import boto
 
 """"
-This connects the index.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
+This connects the application.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
 from Heroku's web app, they are already linked for this project
-"""
+
 import os
 from boto.s3.connection import S3Connection
 s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+"""
+
 
 
 

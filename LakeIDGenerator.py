@@ -1,5 +1,5 @@
 """""
-This code generates a lake id for every unique lake; writing here for testing but may just end up in app.py 
+This code generates a lake id for every unique lake; writing here for testing but may just end up in Oldapp.py 
 """""
 
 ## Needs to filter by Country, Province, Sampling Method, Field Method, and Substrate

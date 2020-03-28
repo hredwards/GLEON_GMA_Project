@@ -19,7 +19,7 @@ body = dbc.Container(
             [
                 html.P(
                     """This is the homepage, this would have graphs and stuff; realistically
-                    long term this needs to become app.py but for now we'll use this for testing"""
+                    long term this needs to become Oldapp.py but for now we'll use this for testing"""
                 ),
                 dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),
             ],

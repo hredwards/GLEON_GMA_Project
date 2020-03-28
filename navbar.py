@@ -3,7 +3,7 @@ import dash_html_components as html
 
 
 """
-This is the function that pulls the nav bar. It is pulled in index.py for all pages
+This is the function that pulls the nav bar. It is pulled in application.py for all pages
 """
 def NavBar():
     NavBar = dbc.Nav(

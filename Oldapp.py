@@ -37,7 +37,7 @@ Initial Set Up options - server, other file/function imports
 # pulls Multi-dropdown options for filters from controls.py; initialized in persistent variable definitions section
 from controls import DB_Info, Reporting_Measures, Microcystin_Method, Field_Methods, Sample_Types, Substrate_Status, COUNTRIES, LAKES
 
-# Initialize Dash App server; uses file called app.py as thing to host
+# Initialize Dash App server; uses file called Oldapp.py as thing to host
 app = dash.Dash(__name__)
 server = app.server
 
