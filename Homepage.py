@@ -13,7 +13,7 @@ body = dbc.Container(
     [
         dbc.Row(
             [
-                html.H3("Welcome to the Global Microcystin Aggregation Project!"),
+                html.H3("Welcome to the Global Microcystin Aggregation Project!", style={'textAlign':'center'}),
             ],
             form=True
         ),
@@ -23,7 +23,7 @@ body = dbc.Container(
                     """This is the homepage, this would have graphs and stuff; realistically
                     long term this needs to become Oldapp.py but for now we'll use this for testing"""
                 ),
-                dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),
+                dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg", className="mr-1", style={'textAlign':'center'}),
             ],
             justify="center", form=True
         ),

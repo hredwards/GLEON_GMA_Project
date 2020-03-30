@@ -10,7 +10,6 @@ table_header = [
 ]
 
 row1 = html.Tr([html.Td("Dr. Ted Harris"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
-row1 = html.Tr([html.Td("Contact2"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
 row2 = html.Tr([html.Td("Contact3"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
 row3 = html.Tr([html.Td("Data Science Student"), html.Td("Data Scientist/Web Interface Manager"), html.Td("gleon.gma@gmail.com")])
 
@@ -33,7 +32,7 @@ body = dbc.Container(
             html.P("If you are interested in the project or have data to contribute, please contact us!")),
         dbc.Row(
             [
-                dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),
+                dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg", className="mr-1", style={'textAlign':'center'}),
             ],
             justify="center", form=True
         ),
