@@ -86,9 +86,9 @@ className="mt-4",
 
 
 ### Photo Carousel
-Photo1 = ("photos/FieldStation.jpg")
-Photo2 = ("photos/HarrisSampling.jpg")
-Photo3 = ("photos/Tank.jpg")
+Photo1 = app.get_asset_url('FieldStation.jpg')
+Photo2 = app.get_asset_url('HarrisSampling.jpg')
+Photo3 = app.get_asset_url('Tank.jpg')
 
 @app.callback(Output('image', 'children'),
               [Input('interval', 'n_intervals')])
