@@ -31,8 +31,8 @@ s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 
 client = boto3.client(
     's3',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
+    aws_access_key_id=os.environ['S3_KEY'],
+    aws_secret_access_key=os.environ['S3_SECRET'],
     config=Config(signature_version='s3v4'))
 
 

@@ -9,29 +9,35 @@ table_header = [
     html.Thead(html.Tr([html.Th("Name"), html.Th("Role"), html.Th("E-Mail")]))
 ]
 
-row1 = html.Tr([html.Td("Dr. Ted Harris"), html.Td("Dent"), html.Td("Dent")])
-row2 = html.Tr([html.Td("Ford"), html.Td("Prefect")])
-row3 = html.Tr([html.Td("Zaphod"), html.Td("Beeblebrox")])
-row4 = html.Tr([html.Td("Trillian"), html.Td("Astra")])
+row1 = html.Tr([html.Td("Dr. Ted Harris"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
+row1 = html.Tr([html.Td("Contact2"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
+row2 = html.Tr([html.Td("Contact3"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
+row3 = html.Tr([html.Td("Data Science Student"), html.Td("Data Scientist/Web Interface Manager"), html.Td("gleon.gma@gmail.com")])
 
-table_body = [html.Tbody([row1, row2, row3, row4])]
+table_body = [html.Tbody([row1, row2, row3])]
 
-table = dbc.Table(table_header + table_body, bordered=True)
-contacts = dbc.Table()
+contactsTable = dbc.Table(table_header + table_body, bordered=True)
 
 
 
 body = dbc.Container(
     [
        dbc.Row(html.H3("Welcome to the Contact Page!")),
-        dbc.Row(html.P("")),
+        dbc.Row(html.P("We are looking for cyanobacteria researchers, algal/metabolite ecologists, ecological modelers, "
+                       "and database managers to: help find data in the literature and/or request microcystin and "
+                       "associated water quality data from colleagues at governmental and non-profit agencies, "
+                       "aggregate microcystin and associated water quality data with different sampling and analytical "
+                       "methods, and analyze a large database of global microcystin and associated water quality data "
+                       "for temporal and spatial trends.")),
+        dbc.Row(
+            html.P("If you are interested in the project or have data to contribute, please contact us!")),
         dbc.Row(
             [
                 dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),
             ],
             justify="center", form=True
         ),
-        dbc.Row(html.table),
+        dbc.Row(contactsTable),
     ],
     className="mt-4",
 )
