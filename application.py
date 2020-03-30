@@ -17,13 +17,13 @@ from navbar import NavBar
 import boto3
 import io
 from botocore.client import Config
-from app import app
+from app import app, server
 
 """"
 This connects the application.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
 from Heroku's web app, they are already linked for this project
 """
-
+server
 import os
 from boto.s3.connection import S3Connection
 s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])

@@ -46,9 +46,19 @@ body = dbc.Container(
                    ],
                 ),
                ),
-
            ],
-           form=True,
+        dbc.Row(
+            [
+                html.H3("If you are interested in the project or have data to contribute, please contact us!"),
+            ],
+            form=True,
+            ),
+        dbc.Row(
+            [
+                dbc.Button("Contact Us!", href="/PageContact", color="secondary"),
+            ],
+            justify="center", form=True
+        ),
        ),
        ],
 className="mt-4",
