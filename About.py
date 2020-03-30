@@ -52,7 +52,7 @@ body = dbc.Container(
                                 ),
                             ],
                         ),
-                    ], width=8,
+                    ],
                 ),
                 dbc.Col(
                     html.Div([
@@ -62,7 +62,7 @@ body = dbc.Container(
                                 dcc.Interval(id='interval', interval=13500),
                             ]),
                         ]),
-                    ]), width=4,
+                    ])
                 ),
             ],
         ),
