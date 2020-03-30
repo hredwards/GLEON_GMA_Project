@@ -86,9 +86,9 @@ className="mt-4",
 
 
 ### Photo Carousel
-Photo1 = ("/photos/FieldStation.jpg")
-Photo2 = ("/photos/HarrisSampling.jpg")
-Photo3 = ("/photos/Tank.jpg")
+Photo1 = ("photos/FieldStation.jpg")
+Photo2 = ("photos/HarrisSampling.jpg")
+Photo3 = ("photos/Tank.jpg")
 
 @app.callback(Output('image', 'children'),
               [Input('interval', 'n_intervals')])
