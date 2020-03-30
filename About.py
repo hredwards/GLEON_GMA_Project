@@ -94,11 +94,11 @@ Photo3 = app.get_asset_url('Tank.jpg')
               [Input('interval', 'n_intervals')])
 def display_image(n):
     if n == None or n % 3 == 1:
-        img = (html.Img(src=Photo1), style={'height':'10%', 'width':'10%'})
+        img = html.Div(html.Img(src=Photo1), style={'height':'10%', 'width':'10%'})
     elif n % 3 == 2:
-        img = (html.Img(src=Photo2), style={'height':'10%', 'width':'10%'})
+        img = html.Div(html.Img(src=Photo2), style={'height':'10%', 'width':'10%'})
     elif n % 3 == 0:
-        img = (html.Img(src=Photo3), style={'height':'10%', 'width':'10%'})
+        img = html.Div(html.Img(src=Photo3), style={'height':'10%', 'width':'10%'})
     else:
         img = "None"
     return img
