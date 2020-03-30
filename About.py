@@ -47,6 +47,7 @@ body = dbc.Container(
                 ),
                ),
            ],
+        ),
         dbc.Row(
             [
                 html.H3("If you are interested in the project or have data to contribute, please contact us!"),
@@ -59,7 +60,6 @@ body = dbc.Container(
             ],
             justify="center", form=True
         ),
-       ),
        ],
 className="mt-4",
 )
