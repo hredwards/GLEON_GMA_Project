@@ -52,7 +52,7 @@ body = dbc.Container(
                                 ),
                             ],
                         ),
-                    ],
+                    ], width=7,
                 ),
                 dbc.Col(
                     html.Div([
