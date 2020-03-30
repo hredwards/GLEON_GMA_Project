@@ -59,11 +59,11 @@ body = dbc.Container(
                         html.Section(id="slideshow", children=[
                             html.Div(id="slideshow-container", children=[
                                 html.Div(id="image"),
-                                dcc.Interval(id='interval', interval=3000),
+                                dcc.Interval(id='interval', interval=13500),
                             ]),
                         ]),
                     ]),),
-            ],
+            ], width=4,
         ),
         dbc.Row(
             [
@@ -94,11 +94,11 @@ Photo3 = app.get_asset_url('Tank.jpg')
               [Input('interval', 'n_intervals')])
 def display_image(n):
     if n == None or n % 3 == 1:
-        img = html.Img(src=Photo1)
+        img = (html.Img(src=Photo1), style={'height':'10%', 'width':'10%'})
     elif n % 3 == 2:
-        img = html.Img(src=Photo2)
+        img = (html.Img(src=Photo2), style={'height':'10%', 'width':'10%'})
     elif n % 3 == 0:
-        img = html.Img(src=Photo3)
+        img = (html.Img(src=Photo3), style={'height':'10%', 'width':'10%'})
     else:
         img = "None"
     return img
