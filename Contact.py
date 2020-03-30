@@ -8,7 +8,14 @@ import dash_html_components as html
 body = dbc.Container(
     [
        dbc.Row(html.H3("Welcome to the Contact Page!")),
-        dbc.Row(html.P("""This would have contact info and a redirect to the about page""")),
+        dbc.Row(html.P("")),
+        dbc.Row(
+            [
+                dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary"),
+            ],
+            justify="center", form=True
+        ),
+        dbc.Row(html.P("Table with info")),
     ],
     className="mt-4",
 )
