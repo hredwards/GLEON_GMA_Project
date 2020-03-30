@@ -62,8 +62,9 @@ body = dbc.Container(
                                 dcc.Interval(id='interval', interval=13500),
                             ]),
                         ]),
-                    ]),),
-            ], width=4,
+                    ]), width=4,
+                ),
+            ],
         ),
         dbc.Row(
             [
