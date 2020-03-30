@@ -14,29 +14,33 @@ from Contact import Contact
 from Login import Login
 from Upload import Upload
 from navbar import NavBar
+import boto3
+import io
+from botocore.client import Config
+from app import app
 
 """"
 This connects the application.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
 from Heroku's web app, they are already linked for this project
+"""
 
 import os
 from boto.s3.connection import S3Connection
 s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
-"""
+
+session = boto3.Session(
+    aws_access_key_id=os.environ['S3_KEY'],
+    aws_secret_access_key=os.environ['S3_KEY'],
+)
+s3 = session.resource('s3')
 
 
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
-""""
-This defines the css file(s) to be used and defines the app and server. It also establishes an empty dataframe and the app layout.
-The app layout pulls the URL/pathname and the display_page app callback below loads the page layout based on this URL
-"""
 
-external_stylesheets = ['/assets/main.css']
-app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
-application = app.server
+
 
 
 

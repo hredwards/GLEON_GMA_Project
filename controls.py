@@ -2,11 +2,22 @@
 This will have the data dictionaries for any filters we may use on the app. 
 """""
 
+from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
+
+
 masterFile = "data/MasterData.csv"
 
 
 ## Date??
 # Look into further, should be able to use built in tools as filter for this
+## Geographic filters
+
+
+
+
+
+
+
 month_Controls = dict(
     Jan="January",
     Feb="February",
@@ -21,6 +32,8 @@ month_Controls = dict(
     Nov="November",
     Dec="December",
 )
+
+
 
 
 ## Geographic filters

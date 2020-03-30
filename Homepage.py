@@ -2,10 +2,12 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from tempgraphs import tnTPPlot, tn_tp
+from app import app
+import data_analysis as da
 
 
-
-
+app.config['suppress_callback_exceptions'] = True
 
 body = dbc.Container(
     [
@@ -30,10 +32,7 @@ body = dbc.Container(
 
                dbc.Col(
                    [
-                       html.H2("Graph"),
-                       dcc.Graph(
-                           figure={"data": [{"x": [1, 2, 3], "y": [1, 4, 9]}]}
-                       ),
+                       tnTPPlot,
                    ]
                ),
               dbc.Col(
@@ -55,6 +54,9 @@ className="body mt-4",
 
 html.A(html.Button("About", id="aboutPage"),
        href="https://gleon.org/research/projects/global-microcystin-aggregation-gma", className="five columns"),
+
+
+
 
 
 def Homepage():
