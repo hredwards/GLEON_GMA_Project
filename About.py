@@ -79,7 +79,7 @@ body = dbc.Container(
             justify="center", form=True
         ),
        ],
-className="mt-4",
+className="ml-auto flex-nowrap mt-3 mt-md-0",
 )
 
 
