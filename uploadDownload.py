@@ -39,14 +39,13 @@ uploadBar = html.Div([
 
 @app.callback(dash.dependencies.Output('output-data-upload', 'children'),
               [dash.dependencies.Input('upload-data', 'contents')],
-              [dash.dependencies.State('upload-data', 'filename')])
-def update_uploaded_file(contents, filename):
+              [dash.dependencies.State('upload-data', 'file_name')])
+def update_uploaded_file(contents, file_name):
     if contents is not None:
-        object_name = str(filename)
+        object_name = file_name
         s3_client = client
         bucket=Bucket
-        response = s3_client.upload_file(filename, bucket, object_name)
-
+        response = s3_client.upload_file(file_name, bucket, object_name)
         return response
 
 
