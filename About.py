@@ -52,7 +52,7 @@ body = dbc.Container(
                                 ),
                             ],
                         ),
-                    ]
+                    ], width=8,
                 ),
                 dbc.Col(
                     html.Div([
@@ -86,9 +86,9 @@ className="mt-4",
 
 
 ### Photo Carousel
-Photo1 = ("/photos/FieldStation")
-Photo2 = ("/photos/HarrisSampling")
-Photo3 = ("/photos/Tank")
+Photo1 = ("/photos/FieldStation.jpg")
+Photo2 = ("/photos/HarrisSampling.jpg")
+Photo3 = ("/photos/Tank.jpg")
 
 @app.callback(Output('image', 'children'),
               [Input('interval', 'n_intervals')])
