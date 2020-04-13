@@ -34,6 +34,11 @@ def get_metadata_table_content(current_metadata):
 
 
 
+
+
+
+
+
 dataPageTable = html.Div([
 dash_table.DataTable(
         id='metadata_table',
@@ -53,11 +58,22 @@ dash_table.DataTable(
         selected_rows=[],
         style_as_list_view=True,
         # sorting=True,
-        style_table={'overflowX': 'scroll'},
+        #style_table={'overflowX': 'scroll'},
         style_cell={'textAlign': 'left'},
         style_header={
             'backgroundColor': 'white',
             'fontWeight': 'bold'
         },
     ),
+
+    # Export the selected datasets in a single csv file
+    html.A(html.Button(id='export-data-button', children='Download Selected Data',
+                       style={
+                           'margin': '10px 0px 10px 10px'
+                       }),
+           href='',
+           id='download-link',
+           download='data.csv',
+           target='_blank'
+           ),
 ])
