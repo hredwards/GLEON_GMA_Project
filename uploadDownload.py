@@ -5,9 +5,10 @@ from urllib.parse import quote as urlquote
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from app import app
-from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket, UploadFolder
+from s3References import session, client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket, UploadFolder
+from botocore.exceptions import ClientError, NoCredentialsError
 
 
 
@@ -36,6 +37,7 @@ uploadBar = html.Div([
 
 
 
+"""
 
 @app.callback(dash.dependencies.Output('output-data-upload', 'children'),
               [dash.dependencies.Input('upload-data', 'contents')],
@@ -48,12 +50,54 @@ def update_uploaded_file(contents, file_name):
         response = s3_client.upload_file(file_name, bucket, object_name)
         return response
 
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'file_name'),
+              Input('upload-data', 'bucket')])
+def upload_file(file_name, bucket, object_name=None):
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+    # Upload the file
+    try:
+        response = client.upload_file(file_name, bucket, object_name)
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
+
+
+
+
+
+"""
 
 
 
 
 
 
+
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'local_file'),
+               Input('upload-data', 'bucket'),
+               Input('upload-data', 's3_file')])
+def upload_to_aws(local_file, bucket, s3_file):
+    s3 = client
+
+    try:
+        s3.upload_file(local_file, bucket, s3_file)
+        print("Upload Successful")
+        return True
+    except FileNotFoundError:
+        print("The file was not found")
+        return False
+    except NoCredentialsError:
+        print("Credentials not available")
+        return False
+
+
+uploaded = upload_to_aws('local_file', 'bucket_name', 's3_file_name')
 
 
 

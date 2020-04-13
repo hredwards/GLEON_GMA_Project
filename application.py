@@ -1,7 +1,6 @@
 """"
 This file contains all app callbacks and pathname redirects. This is the app that is ran to start the server as defined in the procfile
 """
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -17,42 +16,23 @@ from navbar import NavBar
 import boto3
 import io
 from botocore.client import Config
-from app import app, server
-
-""""
-This connects the application.py app to our S3 account which is how files are stored. This requires Heroku and S3 to be linked 
-from Heroku's web app, they are already linked for this project
-"""
-server
+from app import app
 import os
-from boto.s3.connection import S3Connection
-s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
-
-session = boto3.Session(
-    aws_access_key_id=os.environ['S3_KEY'],
-    aws_secret_access_key=os.environ['S3_KEY'],
-)
-s3 = session.resource('s3')
+from s3References import session, client
 
 
+app.config['suppress_callback_exceptions'] = True
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
+""""
+This defines the css file(s) to be used and defines the app and server. It also establishes an empty dataframe and the app layout.
+The app layout pulls the URL/pathname and the display_page app callback below loads the page layout based on this URL
+"""
 
 
 
-
-
-empty_df = pd.DataFrame()
-
-
-app.layout = html.Div([
-    dcc.Location(id = 'url', refresh = True),
-    NavBar(),
-    html.Div(id = 'page-content')
-],
-)
 
 
 """"
@@ -79,7 +59,6 @@ def display_page(pathname):
         return Upload()
     else:
         return Homepage()
-
 
 """"
 This Callback just uses the url/pathname to determine which page is active.
@@ -112,7 +91,7 @@ def toggle_active_links(pathname):
 
 
 if __name__ == '__main__':
-    application.run(debug=True, threaded=True)
+    app.server.run(debug=True, threaded=True)
 
 
 

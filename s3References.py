@@ -23,17 +23,10 @@ import os
 Bucket='gleongmabucket'
 UploadFolder="UploadedData"
 
-
-import os
-from boto.s3.connection import S3Connection
-s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+session = boto3.Session(profile_name="eb-cli")
 
 
-client = boto3.client(
-    's3',
-    aws_access_key_id=os.environ['S3_KEY'],
-    aws_secret_access_key=os.environ['S3_SECRET'],
-    config=Config(signature_version='s3v4'))
+client = session.client('s3')
 
 
 

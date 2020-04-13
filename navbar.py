@@ -13,7 +13,7 @@ def NavBar():
             NavigationLinks,
         ],
         pills=True,
-        className="navbar navbar-default",
+        className="navbar",
     )
     return NavBar
 
@@ -22,26 +22,11 @@ This is where the Page Title and Photo are defined; this is referenced in the na
 """
 PhotoForNavBar = "https://gleon.org/sites/default/files/images/Logo1.JPG"
 
-NavPhoto =html.A(
-        dbc.Row(
-            [
-                dbc.Col((html.Img(src=PhotoForNavBar, height="125px"))),
-            ],
-        ),
-        href="https://gleon.org/research/projects/global-microcystin-aggregation-gma"
-    )
+NavPhoto =html.A((html.Img(src=PhotoForNavBar)),
+        href="https://gleon.org/research/projects/global-microcystin-aggregation-gma")
 
 
-NavTitle = dbc.Row(
-    [
-        html.A("GLEON GMA Project", href="/PageHomepage", style={'color':'#000066', 'font-size':'30px'}),
-    ],
-    className="col-4 col-offset-2",
-    align="center",
-    justify=True,
-    no_gutters=True,
-)
-
+NavTitle = html.A("GLEON GMA Project", href="/PageHomepage", className="heading", style={'color':'#000066', 'float':'left!important', 'font-size':'30px'})
 
 
 
@@ -52,17 +37,13 @@ This is where the Navigation links are defined; the only difference is which pag
 
 NavigationLinks = dbc.Row(
     children=[
-        dbc.NavItem(dbc.NavLink("Home", href="/PageHomepage", id="page-1-link", style={"color":"#000066", "font-size":"15px"})),
-        dbc.NavItem(dbc.NavLink("About", href="/PageAbout", id="page-2-link", style={"color":"#000066", "font-size":"15px"})),
-        dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-3-link", style={"color":"#000066", "font-size":"15px"})),
-        dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-4-link", style={"color":"#000066", "font-size":"15px"})),
-        dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-5-link", style={"color":"#000066", "font-size":"15px"})),
-        dbc.NavItem(dbc.NavLink("Upload", href="/PageUpload", style={"color":"#000066", "font-size":"15px"})),
+        dbc.NavItem(dbc.NavLink("Home", href="/PageHomepage", id="page-1-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("About", href="/PageAbout", id="page-2-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-3-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-4-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-5-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("Upload", href="/PageUpload", style={"color":"#000066", "font-size":"17px"})),
     ],
-    no_gutters=True,
-    className="ml-auto flex-nowrap mt-3 mt-md-0",
-    style={"color":"green"},
-    align="center",
-    justify=True,
+    style={"color":"green", 'float':'right', 'width':'33%'},
 )
 

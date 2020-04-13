@@ -11,9 +11,8 @@ body = dbc.Container(
     [
         dbc.Row(
             [
-                html.H3("Gleon GMA Project - About", style={'textAlign':'center'}),
-            ],
-            form=True,
+                html.H3("Gleon GMA Project - About", style={'textAlign':'center', 'vertical-align':'center'})
+            ], style={'textAlign':'center', 'vertical-align':'center'}
         ),
         dbc.Row(
             [
@@ -48,22 +47,24 @@ body = dbc.Container(
                                                 ],
                                             ),
                                         ],
-                                    ),
+                                    )
                                 ),
                             ],
                         ),
-                    ], width=7,
+                    ], width=6
                 ),
                 dbc.Col(
-                    html.Div([
-                        html.Section(id="slideshow", children=[
-                            html.Div(id="slideshow-container", children=[
-                                html.Div(id="image"),
-                                dcc.Interval(id='interval', interval=13500),
-                            ]),
-                        ]),
-                    ])
-                ),
+                            [
+                                    html.Div([
+                                        html.Section(id="slideshow", children=[
+                                            html.Div(id="slideshow-container", children=[
+                                                html.Div(id="image"),
+                                                dcc.Interval(id='interval', interval=13500),
+                                            ]),
+                                        ]),
+                                    ])
+                            ], width=6
+                        ),
             ],
         ),
         dbc.Row(
@@ -78,8 +79,7 @@ body = dbc.Container(
             ],
             justify="center", form=True
         ),
-       ],
-className="ml-auto flex-nowrap mt-3 mt-md-0",
+       ], className="ml-auto flex-nowrap mt-3 mt-md-0"
 )
 
 
@@ -95,15 +95,16 @@ Photo3 = app.get_asset_url('Tank.jpg')
               [Input('interval', 'n_intervals')])
 def display_image(n):
     if n == None or n % 3 == 1:
-        img = html.Div(html.Img(src=Photo1), style={'height':'auto%', 'width':'100%'})
+        img = html.Div(html.Img(src=Photo1))
     elif n % 3 == 2:
-        img = html.Div(html.Img(src=Photo2), style={'height':'auto', 'width':'100%'})
+        img = html.Div(html.Img(src=Photo2))
     elif n % 3 == 0:
-        img = html.Div(html.Img(src=Photo3), style={'height':'auto%', 'width':'100%'})
+        img = html.Div(html.Img(src=Photo3))
     else:
         img = "None"
     return img
 
+#        img = html.Div(html.Img(src=Photo2), style={'display':'flex', 'height':'auto', 'width':'100%'})
 
 
 def About():

@@ -13,10 +13,10 @@ from settings import months, USEPA_LIMIT, WHO_LIMIT
 #import db_engine as db
 #from db_info import db_info
 #import urllib.parse
+import json
 
 ## pulls s3 info from s3References ##
 from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
-
 
 app.config['suppress_callback_exceptions'] = True
 
@@ -24,52 +24,34 @@ app.config['suppress_callback_exceptions'] = True
 """"
 Import MasterData file
 """
-df=dfMasterData
-
-
-
-pdDfMasterData = pd.DataFrame(dfMasterData)
-
-
-""""
-conversion definitions
-
-def convert_to_json(current_dataframe):
+def get_masterData_table_tnnPlotAll(current_masterdata):
     '''
-        converts all the data to a JSON string
+        returns the data for the specified columns of the master data table
     '''
-    jsonStr = current_dataframe.to_json(orient='split')
+
+    table_df = current_masterdata[
+        ['Body of Water Name', 'Total Nitrogen (ug/L)', 'Total Phosphorus (ug/L)', 'Microcystin (ug/L)']]
+    return table_df.to_dict("rows")
+
+df = dfMasterData
+
+
+
+def convert_list_to_json(current_dataframe):
+    '''
+        converts the master df to a JSON string
+    '''
+    jsonStr = json.dumps(current_dataframe)
     return jsonStr
 
-
-def convert_to_df(jsonified_data):
+def convert_list_to_df(jsonified_data):
     '''
         converts the JSON string back to a dataframe
     '''
-    jsonStr = r'{}'.format(jsonified_data)
-    dff = pd.read_json(jsonStr, orient='split')
-    return dff
+    listDF = pd.DataFrame(jsonified_data)
+    return listDF
 
 
-
-"""
-
-
-
-def convert_to_json(current_dataframe):
-    '''
-        converts all the data to a JSON string
-    '''
-    jsonStr = current_dataframe.to_json(orient='split')
-    return jsonStr
-
-def convert_to_df(jsonified_data):
-    '''
-        converts the JSON string back to a dataframe
-    '''
-    jsonStr = r'{}'.format(jsonified_data)
-    dff = pd.read_json(jsonStr, orient='split')
-    return dff
 
 
 
@@ -81,6 +63,156 @@ OverallTrends --
 
 
 
+
+
+
+# Graph is id as tn_tp_scatter_all and uses range sliders tn_range_all and tp_range_all
+
+""""
+def tn_tp_all(tn_val, tp_val, current_df):
+    min_tn = tn_val[0]
+    max_tn = tn_val[1]
+    min_tp = tp_val[0]
+    max_tp = tp_val[1]
+
+
+    if max_tn == 0:
+        max_tn = np.max(current_df.loc[:, "Total Nitrogen (ug/L)"])
+
+    if max_tp == 0:
+        max_tp = np.max(current_df.loc[:, "Total Phosphorus (ug/L)"])
+
+    dat = current_df[
+        (current_df.loc[:, 'Total Nitrogen (ug/L)'] >= min_tn) & (current_df.loc[:, 'Total Nitrogen (ug/L)'] <= max_tn) & (
+                    current_df.loc[:, 'Total Phosphorus (ug/L)'] >= min_tp) & (
+                    current_df.loc[:, 'Total Phosphorus (ug/L)'] <= max_tp)]
+    MC_conc = dat.loc[:, 'Body of Water Name']
+    # make bins
+    b1 = dat[MC_conc <= USEPA_LIMIT]
+    b2 = dat[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+    b3 = dat[MC_conc > WHO_LIMIT]
+
+    data = [go.Scatter(
+        x=np.log(b1[1]),
+        y=np.log(b1[2]),
+        mode='markers',
+        name="<USEPA",
+        text=current_df[0],
+        marker=dict(
+            size=8,
+            color="green",  # set color equal to a variable
+        )),
+        go.Scatter(
+            x=np.log(b2[1]),
+            y=np.log(b2[2]),
+            mode='markers',
+            name=">USEPA",
+            text=current_df[0],
+            marker=dict(
+                size=8,
+                color="orange"  # set color equal to a variable
+            )),
+        go.Scatter(
+            x=np.log(b3[1]),
+            y=np.log(b3[2]),
+            mode='markers',
+            name=">WHO",
+            text=current_df[0],
+            marker=dict(
+                size=8,
+                color="red",  # set color equal to a variable
+            ))]
+
+    layout = go.Layout(
+        showlegend=True,
+        xaxis=dict(
+            title='log TN'),
+        yaxis=dict(
+            title="log TP"),
+        hovermode='closest'
+    )
+
+    return (go.Figure(data=data, layout=layout))
+
+tnTPPlotAll = html.Div([
+    html.H2('Total Phosphorus vs Total Nitrogen'),
+    dcc.Graph(
+        id="tn_tp_scatter_all",
+    ),
+    html.Div([
+        html.P("Log TN:"),
+        dcc.RangeSlider(
+            id="tn_range_all",
+            min=0,
+            step=None,
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
+        ),
+    ]),
+    html.Div([
+        html.P("Log TP:"),
+        dcc.RangeSlider(
+            id="tp_range_all",
+            min=0,
+            step=None,
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
+        ),
+    ]),
+
+], className="row")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.callback(
+    Output('tn_tp_scatter_all', 'figure'),
+     [Input('tn_range_all', 'value'),
+     Input('tp_range_all', 'value')])
+def update_output(tn_val, tp_val):
+    #dff = convert_list_to_df(df)
+    return tn_tp_all(tn_val, tp_val, df)
+
+
+
+
+
+
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+""""
 
 tnTPPlot = html.Div([
              html.H2('Total Phosphorus vs Total Nitrogen'),
@@ -260,6 +392,13 @@ def tn_tp(tn_val, tp_val, current_df):
 def update_output(tn_val, tp_val, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return tn_tp(tn_val, tp_val, dff)
+
+
+
+
+
+"""
+
 
 
 

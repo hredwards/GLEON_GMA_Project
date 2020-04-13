@@ -3,22 +3,82 @@ background-color:#92a8d1;
 .body {
     margin: 1rem;
     background-color:#ff0000;
+    float:left;
 }
 
-
-
-header{
-  align-items: right;
-  justify: right;
+heading{
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
+.h3{
+  align-items: center;
+  text-align: center;
+  width: 80%;
+}
+
+a.heading{float:left!important;}
 
 .navbar {
 background-color:rgba(51, 204, 255, .1)!important;
 color:green;
-.navbar-expand-xl|lg|md|sm;
+display: flex;
+min-height:80px;
+max-width:100%;
+margin: 1% 10% 1% 10%;
+padding: 0% 0% 0% 0%;
+}
 
+.navbar img{
+height:150px;
+width: auto;
+align:left;
+float:left;
+}
 
+.navbar nav-pills{
+font-size: 25px;
+text-align:center;
+}
+
+.navbar row{
+font-size: 25px;
+color: #000066;
+float:right;
+background-color:rgba(51, 204, 300, .1)!important;
 }
 
 a.active.nav-link{background-color:rgb(0, 153, 51)!important;}
+
+
+.col-container {
+  display: flex;
+  width: 100%;
+}
+.col {
+  flex: 1;
+  padding: 16px;
+}
+
+
+
+
+.photos {
+display: block;
+width: 100%;
+max-height: 100%;
+}
+
+
+.slideshow-container {
+    width: 6;
+  position: relative;
+  margin: auto;
+}
+
+img {
+width:100%;
+height:auto;
+align:left;
+}
