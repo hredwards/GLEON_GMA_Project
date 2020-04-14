@@ -8,8 +8,7 @@ import numpy as np
 from settings import months, USEPA_LIMIT, WHO_LIMIT
 import plotly.graph_objs as go
 import plotly.express as px
-import matplotlib
-from matplotlib import pyplot as plt
+
 
 app.config['suppress_callback_exceptions'] = True
 
