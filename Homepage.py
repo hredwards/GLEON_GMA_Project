@@ -5,7 +5,7 @@ import dash_html_components as html
 #from tempgraphs import tnTPPlotAll
 from app import app
 import data_analysis as da
-from freshGraphs import tn_tp_scatter_all, choose2All
+from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot
 
 app.config['suppress_callback_exceptions'] = True
 
@@ -33,14 +33,12 @@ body = dbc.Container(
         html.Div([
             dbc.Row([
                 tn_tp_scatter_all,
-                choose2All
-            ]),]),
+                choose2All,
+            ]),
+        ]),
+        mapPlot,
 
-
-
-
-
-       ],
+    ],
 #className="body mt-4",
 )
 

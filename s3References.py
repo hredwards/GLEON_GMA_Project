@@ -22,7 +22,7 @@ from boto.s3.connection import S3Connection
 
 
 Bucket='gleongmabucket'
-UploadFolder="UploadedData"
+UploadFolder='gleongmabucket/UploadedData'
 
 #session = boto3.Session(profile_name="eb-cli")
 #client = session.client('s3')

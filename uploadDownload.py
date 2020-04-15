@@ -9,7 +9,12 @@ from dash.dependencies import Input, Output, State
 from app import app
 from s3References import session, client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket, UploadFolder
 from botocore.exceptions import ClientError, NoCredentialsError
+import boto3
 
+session =session
+s3 = session.resource('s3')
+
+#s3.meta.client.upload_file(Filename='input_file_path', Bucket='bucket_name', Key='s3_output_key')
 
 
 uploadBar = html.Div([
@@ -34,6 +39,60 @@ uploadBar = html.Div([
     ),
     html.Div(id='output-data-upload'),
 ])
+
+@app.callback(dash.dependencies.Output('output-data-upload', 'children'),
+              [dash.dependencies.Input('upload-data', 'contents')],
+              [dash.dependencies.State('upload-data', 'file_name')])
+def update_uploaded_file(contents, file_name):
+    if contents is not None:
+        with open('filename', 'rb') as data:
+            s3.upload_fileobj(file_name, UploadFolder, 'test')
+        #return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+uploadBar = html.Div([
+    dcc.Upload(
+        id='upload-data',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select Files')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+    ),
+    html.Div(id='output-data-upload'),
+])
+
+
+
+"""
+
 
 
 
@@ -65,25 +124,21 @@ def upload_file(file_name, bucket, object_name=None):
         logging.error(e)
         return False
     return True
-
-
-
-
-
 """
 
 
 
 
-
-
-
+"""
 @app.callback(Output('output-data-upload', 'children'),
               [Input('upload-data', 'local_file'),
                Input('upload-data', 'bucket'),
                Input('upload-data', 's3_file')])
 def upload_to_aws(local_file, bucket, s3_file):
     s3 = client
+    local_file = str(local_file)
+    bucket = UploadFolder
+    s3_file = str(local_file)
 
     try:
         s3.upload_file(local_file, bucket, s3_file)
@@ -102,14 +157,16 @@ uploaded = upload_to_aws('local_file', 'bucket_name', 's3_file_name')
 
 
 def download_file(file_name, bucket):
-    """
     Function to download a given file from an S3 bucket
-    """
     s3 = boto3.resource('s3')
     output = f"downloads/{file_name}"
     s3.Bucket(bucket).download_file(file_name, output)
 
     return output
+"""
+
+
+
 
 
 

@@ -227,39 +227,171 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 
 
 
-
 """
-from old dash 
+Mapbox Plot -- Microcystin Concentration Geographically
+"""
+mapbox_access_token = 'pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w'
+
+layout = dict(
+    autosize=True,
+    automargin=True,
+    margin=dict(
+        l=30,
+        r=30,
+        b=20,
+        t=40,
+    ),
+    hovermode="closest",
+    plot_bgcolor="#F9F9F9",
+    paper_bgcolor="#F9F9F9",
+    legend=dict(font=dict(size=10), orientation='v'),
+    title='Microcystin Concentration',
+    mapbox=dict(
+        accesstoken=mapbox_access_token,
+        style="light",
+        layers = [
+        {
+            "below": 'traces',
+            #"sourcetype": "raster",
+            #"source": [
+             #   "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+            #]
+        }
+    ]
+    ),
+)
 
 
-choose2AllGraph = html.Div([
-        dcc.Graph(
-            id="comparison_scatter",
-        ),
-        html.Div([
-            html.Div([
-                html.P('Y-axis'),
-                dcc.Dropdown(
-                    id='compare-y-axis',
-                )], className='six columns'),
-            html.Div([
-                html.P('X-axis'),
-                dcc.Dropdown(
-                    id='compare-x-axis')
-            ], className='six columns')
-        ])
-    ], className='row')
+
+def geo_concentration_plot(selected_data):
+    data = []
+    opacity_level = 0.8
+    MC_conc = selected_data['Microcystin (ug/L)']
+    # make bins
+    b1 = selected_data[MC_conc <= USEPA_LIMIT]
+    b2 = selected_data[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+    b3 = selected_data[MC_conc > WHO_LIMIT]
+    data.append(go.Scattermapbox(
+        lon=b1['LONG'],
+        lat=b1['LAT'],
+        mode='markers',
+        text=b1["Body of Water Name"],
+        visible=True,
+        name="MC <= USEPA Limit",
+        marker=dict(color="green", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b2['LONG'],
+        lat=b2['LAT'],
+        mode='markers',
+        text=b2["Body of Water Name"],
+        visible=True,
+        name="MC <= WHO Limit",
+        marker=dict(color="orange", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b3['LONG'],
+        lat=b3['LAT'],
+        mode='markers',
+        text=b3["Body of Water Name"],
+        visible=True,
+        name="MC > WHO Limit",
+        marker=dict(color="red", opacity=opacity_level)))
+    fig=dict(data = data, layout= layout)
+    return fig
+
+
 
 @app.callback(
-    dash.dependencies.Output('comparison_scatter', 'figure'),
-    [dash.dependencies.Input('compare-y-axis', 'value'),
-     dash.dependencies.Input('compare-x-axis', 'value'),
-     dash.dependencies.Input('intermediate-value', 'children')])
-def update_comparison(selected_y, selected_x, jsonified_data):
+    Output('map_MCConc', 'figure'),
+    [Input('intermediate-value', 'children')]
+)
+def update_output(jsonified_data):
     dff = convert_to_df(jsonified_data)
-    return comparison_plot(selected_y, selected_x, dff)
+    return geo_concentration_plot(dff)
+
+
+
+mapPlot =html.Div(
+    [
+        dcc.Graph(id='map_MCConc')
+    ],
+)
+
+""""
+From Oil and Dash
+mapbox_access_token = 'pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w'
+
+layout = dict(
+    autosize=True,
+    automargin=True,
+    margin=dict(
+        l=30,
+        r=30,
+        b=20,
+        t=40
+    ),
+    hovermode="closest",
+    plot_bgcolor="#F9F9F9",
+    paper_bgcolor="#F9F9F9",
+    legend=dict(font=dict(size=10), orientation='h'),
+    title='Satellite Overview',
+    mapbox=dict(
+        accesstoken=mapbox_access_token,
+        style="light",
+        center=dict(
+            lon=-78.05,
+            lat=42.54
+        ),
+        zoom=7,
+    )
+)
+
+@app.callback(Output('main_graph', 'figure'),
+              [Input('well_statuses', 'value'),
+               Input('well_types', 'value'),
+               Input('year_slider', 'value')],
+              [State('lock_selector', 'values'),
+               State('main_graph', 'relayoutData')])
+def make_main_figure(well_statuses, well_types, year_slider,
+                     selector, main_graph_layout):
+
+    dff = filter_dataframe(df, well_statuses, well_types, year_slider)
+
+    traces = []
+    for well_type, dfff in dff.groupby('Well_Type'):
+        trace = dict(
+            type='scattermapbox',
+            lon=dfff['Surface_Longitude'],
+            lat=dfff['Surface_latitude'],
+            text=dfff['Well_Name'],
+            customdata=dfff['API_WellNo'],
+            name=WELL_TYPES[well_type],
+            marker=dict(
+                size=4,
+                opacity=0.6,
+            )
+        )
+        traces.append(trace)
+
+    if (main_graph_layout is not None and 'locked' in selector):
+
+        lon = float(main_graph_layout['mapbox']['center']['lon'])
+        lat = float(main_graph_layout['mapbox']['center']['lat'])
+        zoom = float(main_graph_layout['mapbox']['zoom'])
+        layout['mapbox']['center']['lon'] = lon
+        layout['mapbox']['center']['lat'] = lat
+        layout['mapbox']['zoom'] = zoom
+    else:
+        lon = -78.05
+        lat = 42.54
+        zoom = 7
+
+    figure = dict(data=traces, layout=layout)
+    return figure
+
+
 
 
 """
+
 
 
