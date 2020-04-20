@@ -24,10 +24,10 @@ from boto.s3.connection import S3Connection
 Bucket='gleongmabucket'
 UploadFolder='gleongmabucket/UploadedData'
 
-#session = boto3.Session(profile_name="eb-cli")
+session = boto3.Session(profile_name="eb-cli")
 #client = session.client('s3')
 
-session = boto3.session.Session(aws_access_key_id=os.environ['S3_KEY'], aws_secret_access_key=os.environ['S3_SECRET'])
+#session = boto3.session.Session(aws_access_key_id=os.environ['S3_KEY'], aws_secret_access_key=os.environ['S3_SECRET'])
 client = session.client('s3')
 
 
@@ -39,4 +39,13 @@ MetadataDB = client.get_object(Bucket='gleongmabucket', Key='MetadataDB.csv')
 dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
 
 
+creds = client.get_object(Bucket='gleongmabucket', Key='logins.csv')
+dfCreds = pd.read_csv(io.BytesIO(creds['Body'].read()))
+
+
+user_pwd = dfCreds.iloc[ : , 1]
+user_names = dfCreds.iloc[ : , 0]
+creds = dict(zip(list(user_names), list(user_pwd)))
+
+usersNames = dfCreds.iloc[:, 2]
 #print(dfMetadataDB[:10])

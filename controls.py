@@ -69,11 +69,12 @@ COUNTRIES = dict(
 
 ## Methods
 
-Substrate_Status = dict(
-    PL = 'Planktronic',
-    BE = 'Beach',
-    PE = 'Periphyton',
-)
+Substrate_Status = {
+    'PL' : 'Planktronic',
+    'BE' : 'Beach',
+    'PE' : 'Periphyton'
+}
+
 
 Sample_Types = dict(
     RM = 'Routine Monitoring',
@@ -116,3 +117,37 @@ DB_Info = dict(
     NUML = 'Number of Lakes',
     NUMS = 'Number of Samples',
 )
+
+
+### Options
+Substrate_Status_options = [{'label': str(Substrate_Status[substrate_status]), 'value': str(substrate_status)}
+                  for substrate_status in Substrate_Status]
+
+month_Controls_options = [{'label': str(month_Controls[month_status]),
+                      'value': str(month_status)}
+                     for month_status in month_Controls]
+
+
+Sample_Types_options = [{'label': str(Sample_Types[sample_types]),
+                      'value': str(sample_types)}
+                     for sample_types in Sample_Types]
+
+Field_Methods_options = [{'label': str(Field_Methods[field_methods]),
+                      'value': str(field_methods)}
+                     for field_methods in Field_Methods]
+
+Microcystin_Method_options = [{'label': str(Microcystin_Method[microcystin_method]),
+                      'value': str(microcystin_method)}
+                     for microcystin_method in Microcystin_Method]
+
+Reporting_Measures_options = [{'label': str(Reporting_Measures[reporting_measures]),
+                      'value': str(reporting_measures)}
+                     for reporting_measures in Reporting_Measures]
+
+DB_Info_options = [{'label': str(DB_Info[db_info]),
+                      'value': str(db_info)}
+                     for db_info in DB_Info]
+
+lake_status_options = [{'label': str(LAKES[lake_info]),
+                      'value': str(lake_info)}
+                     for lake_info in LAKES]

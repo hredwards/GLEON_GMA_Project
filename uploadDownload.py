@@ -5,17 +5,228 @@ from urllib.parse import quote as urlquote
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
+
 from dash.dependencies import Input, Output, State
 from app import app
 from s3References import session, client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket, UploadFolder
 from botocore.exceptions import ClientError, NoCredentialsError
 import boto3
 
-session =session
+from controls import month_Controls, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, Reporting_Measures_options
+from dash_reusable_components import Card, NamedSlider, NamedInlineRadioItems
+
 s3 = session.resource('s3')
+bucket = UploadFolder
 
+
+
+
+"""
+Upload Functionality
+"""
+
+
+
+"""
+Upload Bar
+"""
+
+### Questions
+
+
+
+# Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
+
+
+
+
+
+
+# More things with URL inputs or other inputs -- Filtered, Cell Count, Ancillary
+
+uploadBar = html.Div(
+                id="sidebar",
+                children=[
+                    Card(
+                        [
+                        # Identifying - Name, Institution, Database Name
+
+
+                        # Methods - Substrate, Sample Type, Field Method, Microcystin Method
+                            NamedInlineRadioItems(
+                                name="Substrate",
+                                id="substrate-option",
+                                options=Substrate_Status_options,
+                            ),
+                            NamedInlineRadioItems(
+                                name="Sample Types",
+                                id="sample-type-option",
+                                options=Sample_Types_options,
+                            ),
+                            NamedInlineRadioItems(
+                                name="Field Method",
+                                id="field-method-option",
+                                options=Field_Methods_options,
+                            ),
+                            NamedInlineRadioItems(
+                                name="Microcystin Method",
+                                id="microcystin-method-option",
+                                options=Microcystin_Method_options,
+                            ),
+                            dcc.Upload(
+                                id="upload-image",
+                                children=[
+                                    "Drag and Drop or ",
+                                    html.A(children="Select a File"),
+                                ],
+                                style={
+                                    'width': '100%',
+                                    'height': '60px',
+                                    'lineHeight': '60px',
+                                    'borderWidth': '1px',
+                                    'borderStyle': 'dashed',
+                                    'borderRadius': '5px',
+                                    'textAlign': 'center',
+                                    'margin': '10px'
+                                },
+
+                                accept="file_extension|.csv, .xls, .xlsx",
+                            )]),
+
+                    ])
+
+
+"""
+Upload from github
+"""
+@app.callback(
+    Output("div-interactive-image", "children"),
+    [
+        Input("upload-image", "contents"),
+        Input("button-undo", "n_clicks"),
+        Input("button-run-operation", "n_clicks"),
+    ],
+    [
+        State("interactive-image", "selectedData"),
+        State("dropdown-filters", "value"),
+        State("dropdown-enhance", "value"),
+        State("slider-enhancement-factor", "value"),
+        State("upload-image", "filename"),
+        State("radio-selection-mode", "value"),
+        State("radio-encoding-format", "value"),
+        State("div-storage", "children"),
+        State("session-id", "children"),
+    ],
+)
+def update_graph_interactive_image(
+    content,
+    undo_clicks,
+    n_clicks,
+    # new_win_width,
+    selectedData,
+    filters,
+    enhance,
+    enhancement_factor,
+    new_filename,
+    dragmode,
+    enc_format,
+    storage,
+    session_id,
+):
+    t_start = time.time()
+
+    # Retrieve information saved in storage, which is a dict containing
+    # information about the image and its action stack
+    storage = json.loads(storage)
+    filename = storage["filename"]  # Filename is the name of the image file.
+    image_signature = storage["image_signature"]
+
+    # Runs the undo function if the undo button was clicked. Storage stays
+    # the same otherwise.
+    storage = undo_last_action(undo_clicks, storage)
+
+    # If a new file was uploaded (new file name changed)
+    if new_filename and new_filename != filename:
+        # Replace filename
+        if DEBUG:
+            print(filename, "replaced by", new_filename)
+
+        # Update the storage dict
+        storage["filename"] = new_filename
+
+        # Parse the string and convert to pil
+        string = content.split(";base64,")[-1]
+        im_pil = drc.b64_to_pil(string)
+
+        # Update the image signature, which is the first 200 b64 characters
+        # of the string encoding
+        storage["image_signature"] = string[:200]
+
+        # Posts the image string into the Bucketeer Storage (which is hosted
+        # on S3)
+        store_image_string(string, session_id)
+        if DEBUG:
+            print(new_filename, "added to Bucketeer S3.")
+
+        # Resets the action stack
+        storage["action_stack"] = []
+
+    # If an operation was applied (when the filename wasn't changed)
+    else:
+        # Add actions to the action stack (we have more than one if filters
+        # and enhance are BOTH selected)
+        if filters:
+            type = "filter"
+            operation = filters
+            add_action_to_stack(storage["action_stack"], operation, type, selectedData)
+
+        if enhance:
+            type = "enhance"
+            operation = {
+                "enhancement": enhance,
+                "enhancement_factor": enhancement_factor,
+            }
+            add_action_to_stack(storage["action_stack"], operation, type, selectedData)
+
+        # Apply the required actions to the picture, using memoized function
+        im_pil = apply_actions_on_image(
+            session_id, storage["action_stack"], filename, image_signature
+        )
+
+    t_end = time.time()
+    if DEBUG:
+        print(f"Updated Image Storage in {t_end - t_start:.3f} sec")
+
+    return [
+        drc.InteractiveImagePIL(
+            image_id="interactive-image",
+            image=im_pil,
+            enc_format=enc_format,
+            dragmode=dragmode,
+            verbose=DEBUG,
+        ),
+        html.Div(
+            id="div-storage", children=json.dumps(storage), style={"display": "none"}
+        ),
+    ]
+
+
+
+
+
+
+
+
+"""
+Download Bar
+"""
+
+
+
+"""
+Not working
 #s3.meta.client.upload_file(Filename='input_file_path', Bucket='bucket_name', Key='s3_output_key')
-
 
 uploadBar = html.Div([
     dcc.Upload(
@@ -49,17 +260,7 @@ def update_uploaded_file(contents, file_name):
             s3.upload_fileobj(file_name, UploadFolder, 'test')
         #return response
 
-
-
-
-
-
-
-
-
-
-
-
+"""
 
 
 
