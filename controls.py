@@ -100,23 +100,11 @@ Microcystin_Method = dict(
 ## Data
 # need url link box for yes on all
 
-Reporting_Measures = dict(
-    PUBPR = 'Peer Reviewed or Published',
-    FM = 'Field Method',
-    LM = 'Lab Method',
-    QAQC = 'QA/QC Available',
-    INST = "Institution",
-)
+data_Review = {
+    'is' : 'Yes',
+    'not' : 'No',
+}
 
-DB_Info = dict(
-    DBID = 'Database ID',
-    DBN = 'Database Name',
-    UPBY = 'Uploaded By',
-    UPDA = 'Upload Date',
-    MCM = 'Microcystin_Method',
-    NUML = 'Number of Lakes',
-    NUMS = 'Number of Samples',
-)
 
 
 ### Options
@@ -140,14 +128,11 @@ Microcystin_Method_options = [{'label': str(Microcystin_Method[microcystin_metho
                       'value': str(microcystin_method)}
                      for microcystin_method in Microcystin_Method]
 
-Reporting_Measures_options = [{'label': str(Reporting_Measures[reporting_measures]),
-                      'value': str(reporting_measures)}
-                     for reporting_measures in Reporting_Measures]
-
-DB_Info_options = [{'label': str(DB_Info[db_info]),
-                      'value': str(db_info)}
-                     for db_info in DB_Info]
 
 lake_status_options = [{'label': str(LAKES[lake_info]),
                       'value': str(lake_info)}
                      for lake_info in LAKES]
+
+data_Review_options = [{'label': str(data_Review[yn]),
+                      'value': str(yn)}
+                     for yn in data_Review]

@@ -99,6 +99,20 @@ border-left-style: initial;
 border-left-width: initial;
 }
 
+
+.uploadOption.input {
+    float: right;
+    clear: left;
+    width: 50px;
+    line-height: 20px;
+}
+
+.uploadOption.label {
+    float: left;
+    vertical-align: middle;
+}
+
+
 .photos {
 display: block;
 width: 100%;

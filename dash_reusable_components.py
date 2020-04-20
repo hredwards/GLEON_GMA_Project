@@ -199,6 +199,28 @@ def NamedInlineRadioItems(name, id, options, **kwargs):
         **_omit(["style"], kwargs),
     )
 
+def HalsNamedInlineRadioItems(name, id, options, **kwargs):
+    return html.Div(
+        id=f"div-{id}",
+        style=_merge(
+            {"display": "block", "margin-bottom": ".5rem", "float":"right", "margin-top": ".5rem"},
+            kwargs.get("style", {}),
+        ),
+        children=[
+            f"{name}:",
+            dcc.RadioItems(
+                id=id,
+                options=options,
+                labelStyle={
+                    "display": "inline-block",
+                    "margin-right": "1rem",
+                    "font-weight": 300,
+                },
+                style={"display": "inline-block", "margin-left": "1rem", "padding-left":"1rem"}, className="uploadOption",
+            ),
+        ],
+        **_omit(["style"], kwargs),
+    )
 
 # Custom Image Components
 def InteractiveImagePIL(

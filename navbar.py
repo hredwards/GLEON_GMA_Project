@@ -42,7 +42,6 @@ NavigationLinks = dbc.Row(
         dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-3-link", style={"color":"#000066", "font-size":"17px"})),
         dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-4-link", style={"color":"#000066", "font-size":"17px"})),
         dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-5-link", style={"color":"#000066", "font-size":"17px"})),
-        dbc.NavItem(dbc.NavLink("Upload", href="/PageUpload", style={"color":"#000066", "font-size":"17px"})),
     ],
     style={"color":"green", 'float':'right', 'width':'33%'},
 )

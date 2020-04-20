@@ -37,36 +37,12 @@ login_form = html.Div([
 ])
 
 
-session_cookie = flask.request.cookies.get('custom-auth-session')
-
-def logInOut():
-    session_cookie = flask.request.cookies.get('custom-auth-session')
-
-    if not session_cookie:
-        # If there's no cookie we need to login.
-        return [html.Div(html.H2("Charts will be displayed here after user's authentication."),
-                         style={'textAlign': 'center',
-                                'color': 'red'}), '', login_form]
-    else:
-        logout_output = html.Div(children=[html.Div(html.H3('Hello {} !'.format(usersNames[session_cookie])),
-                                                    style={'display': 'inline-block'}),
-                                           html.Div(dcc.LogoutButton(logout_url='/logout'),
-                                                    style={'display': 'inline-block'})],
-                                 style={
-                                     'color': 'green',
-                                     'height': '50px'
-                                 }
-                                 )
-        return [logout_output]
-
-
 
 body = dbc.Container(
     [
        dbc.Row(html.H3("Welcome to the Login Page!")),
         dbc.Row(html.P("""This is the Login page, this would have a login box ofr registered users and a redirect to
                          the contact page""")),
-        logInOut(),
         html.Div(id='custom-auth-frame'),
         html.Div(id='custom-auth-frame-1',
            style={
@@ -79,29 +55,6 @@ body = dbc.Container(
     ],
     className="mt-4",
 )
-
-
-
-@app.callback(Output('custom-auth-frame-1', 'children'))
-def render_content():
-    session_cookie = flask.request.cookies.get('custom-auth-session')
-
-    if not session_cookie:
-        # If there's no cookie we need to login.
-        return [html.Div(html.H2("Charts will be displayed here after user's authentication."),
-                         style={'textAlign': 'center',
-                                'color': 'red'}), '', login_form]
-    else:
-        logout_output = html.Div(children=[html.Div(html.H3('Hello {} !'.format(usersNames[session_cookie])),
-                                                    style={'display': 'inline-block'}),
-                                           html.Div(dcc.LogoutButton(logout_url='/logout'),
-                                                    style={'display': 'inline-block'})],
-                                 style={
-                                     'color': 'green',
-                                     'height': '50px'
-                                 }
-                                 )
-        return [logout_output]
 
 
 

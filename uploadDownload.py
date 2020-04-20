@@ -13,8 +13,8 @@ from s3References import session, client, MasterData, dfMasterData, MetadataDB, 
 from botocore.exceptions import ClientError, NoCredentialsError
 import boto3
 
-from controls import month_Controls, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, Reporting_Measures_options
-from dash_reusable_components import Card, NamedSlider, NamedInlineRadioItems
+from controls import month_Controls, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, data_Review_options
+from dash_reusable_components import Card, NamedSlider, NamedInlineRadioItems, HalsNamedInlineRadioItems
 
 s3 = session.resource('s3')
 bucket = UploadFolder
@@ -36,7 +36,6 @@ Upload Bar
 
 
 
-# Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
 
 
 
@@ -50,30 +49,97 @@ uploadBar = html.Div(
                 children=[
                     Card(
                         [
-                        # Identifying - Name, Institution, Database Name
+                         # Identifying - Name, Institution, Database Name
+                            html.Form([
+                                dcc.Input(placeholder='Name', id='uploader-Name', type='text'),
+                                dcc.Input(placeholder='Institution', id='user-inst', type='text'),
+                                dcc.Input(placeholder='Database Name', id='db-name', type='text'),
+                            ]),
 
+
+
+                        # Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
+                            dbc.Row([
+                                HalsNamedInlineRadioItems(
+                                    name="Is the data peer reviewed or published?",
+                                    id="is-data-reviewed",
+                                    options=data_Review_options,
+                                ),
+                                dcc.Input(
+                                    placeholder='URL Link',
+                                    type='text',
+                                    value='',
+                                    id='publication-url',
+                                    style={'display': 'none'}),
+                            ]),
+
+                            dbc.Row([
+                                HalsNamedInlineRadioItems(
+                                    name="Is the field method reported?",
+                                    id="is-field-method-reported",
+                                    options=data_Review_options,
+                                ),
+                                dcc.Input(
+                                    placeholder='URL Link',
+                                    type='text',
+                                    value='',
+                                    id='field-method-report-url',
+                                    style={'display': 'none'}),
+                            ]),
+
+                            dbc.Row([
+                                HalsNamedInlineRadioItems(
+                                    name="Is the lab method reported?",
+                                    id="is-lab-method bui-reported",
+                                    options=data_Review_options,
+                                ),
+                                dcc.Input(
+                                    placeholder='URL Link',
+                                    type='text',
+                                    value='',
+                                    id='lab-method-report-url',
+                                    style={'display': 'none'}),
+                           ]),
+
+                            dbc.Row([
+                                HalsNamedInlineRadioItems(
+                                    name = 'Is the full QA/QC data available upon request?',
+                                    id="is-full-qaqc-available",
+                                    options=data_Review_options,
+                                ),
+                                dcc.Input(
+                                    placeholder='URL Link',
+                                    type='text',
+                                    value='',
+                                    id='full-qaqc-url',
+                                    style={'display': 'none'}
+                                ),
+
+                            ]),
 
                         # Methods - Substrate, Sample Type, Field Method, Microcystin Method
-                            NamedInlineRadioItems(
+                            dbc.Row([HalsNamedInlineRadioItems(
                                 name="Substrate",
                                 id="substrate-option",
                                 options=Substrate_Status_options,
                             ),
-                            NamedInlineRadioItems(
+                            ], className="uploadOption"),
+                            dbc.Row([HalsNamedInlineRadioItems(
                                 name="Sample Types",
                                 id="sample-type-option",
                                 options=Sample_Types_options,
-                            ),
-                            NamedInlineRadioItems(
+                            ),]),
+                            dbc.Row([HalsNamedInlineRadioItems(
                                 name="Field Method",
                                 id="field-method-option",
                                 options=Field_Methods_options,
-                            ),
-                            NamedInlineRadioItems(
+                            ),]),
+                            dbc.Row([HalsNamedInlineRadioItems(
                                 name="Microcystin Method",
                                 id="microcystin-method-option",
                                 options=Microcystin_Method_options,
-                            ),
+                            ),]),
+
                             dcc.Upload(
                                 id="upload-file",
                                 children=[
@@ -98,10 +164,130 @@ uploadBar = html.Div(
 
 
 """
-Upload from github
+Callbacks for inputs with URLs or Other Fields if "Yes"
+"""
+# Controls if text fields are visible based on selected options in upload questionnaire
+@app.callback(
+    dash.dependencies.Output('publication-url', 'style'),
+    [dash.dependencies.Input('is-data-reviewed', 'value')]
+)
+def show_peer_review_url(is_peer_reviewed):
+    if is_peer_reviewed == 'is':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    dash.dependencies.Output('field-method-report-url', 'style'),
+    [dash.dependencies.Input('is-field-method-reported', 'value')]
+)
+def show_field_method_url(is_fm_reported):
+    if is_fm_reported == 'is':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    dash.dependencies.Output('lab-method-report-url', 'style'),
+    [dash.dependencies.Input('is-lab-method bui-reported', 'value')]
+)
+def show_lab_method_url(is_lm_reported):
+    if is_lm_reported == 'is':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    dash.dependencies.Output('qaqc-url', 'style'),
+    [dash.dependencies.Input('is-qaqc-available', 'value')]
+)
+def show_qaqc_url(is_qaqc_available):
+    if is_qaqc_available == 'is':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    dash.dependencies.Output('full-qaqc-url', 'style'),
+    [dash.dependencies.Input('is-full-qaqc-available', 'value')]
+)
+def show_full_qaqc_url(is_full_qaqc_available):
+    if is_full_qaqc_available == 'is':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+
+"""
+Upload
 """
 
 
+
+@app.callback(
+    dash.dependencies.Output('upload-msg', 'children'),
+    [dash.dependencies.Input('upload-file', 'n_clicks')],
+    [dash.dependencies.State('db-name', 'value'),
+     dash.dependencies.State('uploader-Name', 'value'),
+     dash.dependencies.State('user-inst', 'value'),
+     dash.dependencies.State('upload-data', 'contents'),
+     dash.dependencies.State('upload-data', 'filename'),
+     dash.dependencies.State('publication-url', 'value'),
+     dash.dependencies.State('field-method-report-url', 'value'),
+     dash.dependencies.State('lab-method-report-url', 'value'),
+     dash.dependencies.State('qaqc-url', 'value'),
+     dash.dependencies.State('full-qaqc-url', 'value'),
+     dash.dependencies.State('substrate-option', 'value'),
+     dash.dependencies.State('sample-type-option', 'value'),
+     dash.dependencies.State('field-method-option', 'value'),
+     dash.dependencies.State('microcystin-method', 'value'),
+     dash.dependencies.State('filter-size', 'value'),
+     dash.dependencies.State('cell-count-url', 'value'),
+     dash.dependencies.State('ancillary-data', 'value')])
+def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationURL, fieldMURL, labMURL, QAQCUrl,
+                fullQAQCUrl, substrate, sampleType, fieldMethod, microcystinMethod, filterSize, cellCountURL,
+                ancillaryURL):
+    if n_clicks != None and n_clicks > 0:
+        if username == None or not username.strip():
+            return 'Name field cannot be empty.'
+        elif userinst == None or not userinst.strip():
+            return 'Institution cannot be empty.'
+        elif dbname == None or not dbname.strip():
+            return 'Database name cannot be empty.'
+        elif contents is None:
+            return 'Please select a file.'
+        else:
+            new_db = db_info(dbname, username, userinst)
+            new_db.db_publication_url = publicationURL
+            new_db.db_field_method_url = fieldMURL
+            new_db.db_lab_method_url = labMURL
+            new_db.db_QAQC_url = QAQCUrl
+            new_db.db_full_QAQC_url = fullQAQCUrl
+            new_db.db_substrate = substrate
+            new_db.db_sample_type = sampleType
+            new_db.db_field_method = fieldMethod
+            new_db.db_microcystin_method = microcystinMethod
+            new_db.db_filter_size = filterSize
+            new_db.db_cell_count_method = cellCountURL
+            new_db.db_ancillary_url = ancillaryURL
+
+            return upload_new_database(new_db, contents, filename)
+
+
+
+
+login_form = html.Div([
+    html.Form([
+        dcc.Input(placeholder='username', name='username', type='text'),
+        dcc.Input(placeholder='password', name='password', type='password'),
+        html.Button('Login', type='submit')
+    ], action='/login', method='post')
+])
 
 
 
@@ -153,34 +339,6 @@ def update_uploaded_file(contents, file_name):
 
 
 
-
-"""
-uploadBar = html.Div([
-    dcc.Upload(
-        id='upload-data',
-        children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select Files')
-        ]),
-        style={
-            'width': '100%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px'
-        },
-        # Allow multiple files to be uploaded
-        multiple=True
-    ),
-    html.Div(id='output-data-upload'),
-])
-
-
-
-"""
 
 
 
