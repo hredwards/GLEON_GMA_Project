@@ -75,7 +75,7 @@ uploadBar = html.Div(
                                 options=Microcystin_Method_options,
                             ),
                             dcc.Upload(
-                                id="upload-image",
+                                id="upload-file",
                                 children=[
                                     "Drag and Drop or ",
                                     html.A(children="Select a File"),
@@ -100,118 +100,6 @@ uploadBar = html.Div(
 """
 Upload from github
 """
-@app.callback(
-    Output("div-interactive-image", "children"),
-    [
-        Input("upload-image", "contents"),
-        Input("button-undo", "n_clicks"),
-        Input("button-run-operation", "n_clicks"),
-    ],
-    [
-        State("interactive-image", "selectedData"),
-        State("dropdown-filters", "value"),
-        State("dropdown-enhance", "value"),
-        State("slider-enhancement-factor", "value"),
-        State("upload-image", "filename"),
-        State("radio-selection-mode", "value"),
-        State("radio-encoding-format", "value"),
-        State("div-storage", "children"),
-        State("session-id", "children"),
-    ],
-)
-def update_graph_interactive_image(
-    content,
-    undo_clicks,
-    n_clicks,
-    # new_win_width,
-    selectedData,
-    filters,
-    enhance,
-    enhancement_factor,
-    new_filename,
-    dragmode,
-    enc_format,
-    storage,
-    session_id,
-):
-    t_start = time.time()
-
-    # Retrieve information saved in storage, which is a dict containing
-    # information about the image and its action stack
-    storage = json.loads(storage)
-    filename = storage["filename"]  # Filename is the name of the image file.
-    image_signature = storage["image_signature"]
-
-    # Runs the undo function if the undo button was clicked. Storage stays
-    # the same otherwise.
-    storage = undo_last_action(undo_clicks, storage)
-
-    # If a new file was uploaded (new file name changed)
-    if new_filename and new_filename != filename:
-        # Replace filename
-        if DEBUG:
-            print(filename, "replaced by", new_filename)
-
-        # Update the storage dict
-        storage["filename"] = new_filename
-
-        # Parse the string and convert to pil
-        string = content.split(";base64,")[-1]
-        im_pil = drc.b64_to_pil(string)
-
-        # Update the image signature, which is the first 200 b64 characters
-        # of the string encoding
-        storage["image_signature"] = string[:200]
-
-        # Posts the image string into the Bucketeer Storage (which is hosted
-        # on S3)
-        store_image_string(string, session_id)
-        if DEBUG:
-            print(new_filename, "added to Bucketeer S3.")
-
-        # Resets the action stack
-        storage["action_stack"] = []
-
-    # If an operation was applied (when the filename wasn't changed)
-    else:
-        # Add actions to the action stack (we have more than one if filters
-        # and enhance are BOTH selected)
-        if filters:
-            type = "filter"
-            operation = filters
-            add_action_to_stack(storage["action_stack"], operation, type, selectedData)
-
-        if enhance:
-            type = "enhance"
-            operation = {
-                "enhancement": enhance,
-                "enhancement_factor": enhancement_factor,
-            }
-            add_action_to_stack(storage["action_stack"], operation, type, selectedData)
-
-        # Apply the required actions to the picture, using memoized function
-        im_pil = apply_actions_on_image(
-            session_id, storage["action_stack"], filename, image_signature
-        )
-
-    t_end = time.time()
-    if DEBUG:
-        print(f"Updated Image Storage in {t_end - t_start:.3f} sec")
-
-    return [
-        drc.InteractiveImagePIL(
-            image_id="interactive-image",
-            image=im_pil,
-            enc_format=enc_format,
-            dragmode=dragmode,
-            verbose=DEBUG,
-        ),
-        html.Div(
-            id="div-storage", children=json.dumps(storage), style={"display": "none"}
-        ),
-    ]
-
-
 
 
 
