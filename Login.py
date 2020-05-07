@@ -41,8 +41,6 @@ login_form = html.Div([
 body = dbc.Container(
     [
        dbc.Row(html.H3("Welcome to the Login Page!")),
-        dbc.Row(html.P("""This is the Login page, this would have a login box ofr registered users and a redirect to
-                         the contact page""")),
         html.Div(id='custom-auth-frame'),
         html.Div(id='custom-auth-frame-1',
            style={
@@ -53,7 +51,7 @@ body = dbc.Container(
         login_form,
         dbc.Button("Want a login?", href="/PageContact", color="secondary"),
     ],
-    className="mt-4",
+    className="mt-4 pretty_container twelve columns",
 )
 
 

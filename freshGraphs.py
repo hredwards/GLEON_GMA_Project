@@ -119,7 +119,7 @@ tn_tp_scatter_all = dcc.Graph(id="tn_tp_scatter")
 )
 def update_output(jsonified_data):
     dff = convert_to_df(jsonified_data)
-    return tn_tp_all(dff)
+    return tn_tp_all(df)
 
 
 

@@ -5,7 +5,7 @@ import dash_html_components as html
 #from tempgraphs import tnTPPlotAll
 from app import app
 import data_analysis as da
-from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json, df
+from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json, dfMasterData
 
 app.config['suppress_callback_exceptions'] = True
 
@@ -22,7 +22,7 @@ body = html.Div(
                 dbc.Col(choose2All, className="pretty_container four columns"),
 
             ], className="twelve columns"),
-        html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(df)),
+        html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(dfMasterData)),
     ], className="twelve columns"
 )
 
