@@ -22,7 +22,7 @@ import os
 from s3References import session, client, usersNames
 
 
-app.config['suppress_callback_exceptions'] = False
+app.config['suppress_callback_exceptions'] = True
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
