@@ -8,19 +8,17 @@ from forDataTab import get_metadata_table_content, dataPageTable, refreshButton,
 
 
 
-body = dbc.Container(
+body = html.Div(
     [
        dbc.Row(html.H3("Welcome to the Data Page!")),
         dbc.Row(html.P("""This is the Data page, this would have downloads for all data""")),
         dataPageTable,
     ],
-    className="mt-4",
+    className="mt-4 twelve columns",
 )
 
 
 def Data():
-    layout = html.Div([
-        body,
-    ])
+    layout =body
     return layout
 

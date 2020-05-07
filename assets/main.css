@@ -6,11 +6,16 @@ background-color:#92a8d1;
     float:left;
 }
 
-heading{
+#heading{
   align-items: center;
   text-align: center;
-  width: 100%;
+  float:right;
+  right:-50%;
+  width:100%;
 }
+
+
+
 
 .h3{
   align-items: center;
@@ -18,7 +23,44 @@ heading{
   width: 80%;
 }
 
+
+.row.pageTitle {
+    max-width:100%;
+    display: flex;
+    padding: 0% 0% 0% 0%;
+    align-text:center;
+}
+
+
+
 a.heading{float:left!important;}
+
+#page-content {
+display: flex;
+max-width:100%;
+margin: 1% 0% 1% 0%;
+padding: .5rem 1rem;
+}
+
+.page-content.container{
+width:100%;
+}
+
+div.page-content{
+width:100%;
+}
+
+.nav {
+display: flex;
+-ms-flex-wrap: wrap;
+flex-wrap: wrap;
+padding-left: 0;
+margin-bottom: 0;
+list-style: none;
+}
+
+
+
 
 .navbar {
 background-color:rgba(51, 204, 255, .1)!important;
@@ -26,8 +68,15 @@ color:green;
 display: flex;
 min-height:80px;
 max-width:100%;
-margin: 1% 10% 1% 10%;
-padding: 0% 0% 0% 0%;
+margin: 1% 0% 1% 0%;
+padding: .5rem 1rem;;
+}
+
+#NavBarheading{
+  align-items: center;
+  text-align: center;
+  float:right;
+  right:-50%;
 }
 
 .navbar img{
@@ -38,12 +87,12 @@ float:left;
 }
 
 .navbar nav-pills{
-font-size: 25px;
+font-size: 1.5rem;
 text-align:center;
 }
 
-.navbar row{
-font-size: 25px;
+.row.navbar{
+font-size: 1.5rem;
 color: #000066;
 float:right;
 background-color:rgba(51, 204, 300, .1)!important;
@@ -70,7 +119,9 @@ font-size: 0.9rem;}
 }
 #sidebar {
 padding: 2rem 2rem 0 2rem;
-font-size: 1.5rem;}
+font-size: 1.5rem;
+width:80%;
+}
 
 input[type="radio"] {
 -webkit-appearance: radio;

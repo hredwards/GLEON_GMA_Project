@@ -1,6 +1,7 @@
 """""
 This code generates a lake id for every unique lake; writing here for testing but may just end up in Oldapp.py 
 """""
+from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
 
 ## Needs to filter by Country, Province, Sampling Method, Field Method, and Substrate
 
@@ -9,7 +10,7 @@ import random
 from dataBase import masterFile
 import csv
 
-masterDataPandaFrame=pd.read_csv(masterFile,header=None)
+masterDataPandaFrame=dfMasterData
 
 
 """
@@ -42,13 +43,9 @@ for i in lakeName*10:
 print(len(lakeIDs))
 
 
-lakeNameandID = dict(zip(lakeName, lakeIDs))
+lakeNameandID = dict(zip(lakeIDs, lakeName))
 
 print(lakeNameandID)
-
-
-lakeNamesandIDsDataFrame = pd.DataFrame.from_dict(lakeNameandID, orient="index")
-lakeNamesandIDsDataFrame.to_csv("data/lakeNamesandIDs.csv", index=True)
 
 
 

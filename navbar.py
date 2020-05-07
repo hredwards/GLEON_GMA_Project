@@ -13,7 +13,7 @@ def NavBar():
             NavigationLinks,
         ],
         pills=True,
-        className="navbar",
+        className="navbar pretty_container",
     )
     return NavBar
 
@@ -26,7 +26,7 @@ NavPhoto =html.A((html.Img(src=PhotoForNavBar)),
         href="https://gleon.org/research/projects/global-microcystin-aggregation-gma")
 
 
-NavTitle = html.A("GLEON GMA Project", href="/PageHomepage", className="heading", style={'color':'#000066', 'float':'left!important', 'font-size':'30px'})
+NavTitle = html.A("GLEON GMA Project", href="/PageHomepage", id="NavBarheading", style={'color':'#000066', 'font-size':'3rem'})
 
 
 
@@ -37,12 +37,13 @@ This is where the Navigation links are defined; the only difference is which pag
 
 NavigationLinks = dbc.Row(
     children=[
-        dbc.NavItem(dbc.NavLink("Home", href="/PageHomepage", id="page-1-link", style={"color":"#000066", "font-size":"17px"})),
-        dbc.NavItem(dbc.NavLink("About", href="/PageAbout", id="page-2-link", style={"color":"#000066", "font-size":"17px"})),
-        dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-3-link", style={"color":"#000066", "font-size":"17px"})),
-        dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-4-link", style={"color":"#000066", "font-size":"17px"})),
-        dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-5-link", style={"color":"#000066", "font-size":"17px"})),
+        dbc.NavItem(dbc.NavLink("Home", href="/PageHomepage", id="page-1-link", style={"color":"#000066", "font-size":"1.8rem"})),
+        dbc.NavItem(dbc.NavLink("About", href="/PageAbout", id="page-2-link", style={"color":"#000066", "font-size":"1.8rem"})),
+        dbc.NavItem(dbc.NavLink("Filter Graphs", href="/FilterData", id="page-3-link", style={"color": "#000066", "font-size": "1.8rem"})),
+        dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-4-link", style={"color":"#000066", "font-size":"1.8rem"})),
+        dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-5-link", style={"color":"#000066", "font-size":"1.8rem"})),
+        dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-6-link", style={"color":"#000066", "font-size":"1.8rem"})),
     ],
-    style={"color":"green", 'float':'right', 'width':'33%'},
+    style={"color":"green", 'float':'right'},
 )
 

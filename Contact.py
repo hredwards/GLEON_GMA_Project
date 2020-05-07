@@ -18,7 +18,7 @@ contactsTable = dbc.Table(table_header + table_body, bordered=True)
 
 
 
-body = dbc.Container(
+body = html.Div(
     [
        dbc.Row(html.H3("Welcome to the Contact Page!")),
         dbc.Row(html.P("We are looking for cyanobacteria researchers, algal/metabolite ecologists, ecological modelers, "
@@ -37,13 +37,11 @@ body = dbc.Container(
         ),
         dbc.Row(contactsTable),
     ],
-    className="mt-4",
+    className="mt-4 twelve columns",
 )
 
 
 
 def Contact():
-    layout = html.Div([
-        body
-    ])
+    layout = body
     return layout

@@ -3,7 +3,7 @@ This will have the data dictionaries for any filters we may use on the app.
 """""
 
 from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
-
+from LakeIDGenerator import lakeNameandID
 
 masterFile = "data/MasterData.csv"
 
@@ -43,8 +43,6 @@ month_Controls = dict(
  #   'LakeID': "LakeName",
 #}
 
-from LakeIDGenerator import lakeNameandID
-
 LAKES=lakeNameandID
 
 COUNTRIES = dict(
@@ -65,10 +63,7 @@ COUNTRIES = dict(
 # )
 
 
-
-
 ## Methods
-
 Substrate_Status = {
     'PL' : 'Planktronic',
     'BE' : 'Beach',
@@ -82,8 +77,6 @@ Sample_Types = dict(
     SF = 'Scum Focused',
 )
 
-#need to code in depth integrated (m) for all
-# and # of samples integrated for SIS
 Field_Methods = dict(
     VIS = 'Vertically Integrated Sample',
     DDS = 'Discrete Depth Sample',
@@ -98,7 +91,6 @@ Microcystin_Method = dict(
 
 
 ## Data
-# need url link box for yes on all
 
 data_Review = {
     'is' : 'Yes',

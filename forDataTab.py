@@ -28,7 +28,7 @@ def get_metadata_table_content(current_metadata):
         returns the data for the specified columns of the metadata data table
     '''
 
-    table_df = dfMetadataDB[
+    table_df = current_metadata[
         ['DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Microcystin_method', 'N_lakes', 'N_samples']]
     return table_df.to_dict("rows")
 
