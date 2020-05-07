@@ -17,12 +17,13 @@ from navbar import NavBar
 import boto3
 import io
 from botocore.client import Config
-from app import app
+from app import app, server
 import os
 from s3References import session, client, usersNames
 
 
 app.config['suppress_callback_exceptions'] = True
+server = app.server
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
