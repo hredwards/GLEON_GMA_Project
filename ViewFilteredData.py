@@ -10,7 +10,7 @@ from freshGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlot, convert_
 from s3References import dfMasterData
 from controls import month_Controls, LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, data_Review_options
 
-app.config['suppress_callback_exceptions'] = False
+app.config['suppress_callback_exceptions'] = True
 df = dfMasterData
 
 
