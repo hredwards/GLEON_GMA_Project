@@ -9,20 +9,21 @@ from dash.dependencies import Input, Output
 from Homepage import Homepage
 from About import About
 from Data import Data
+from ViewFilteredData import FilteredView
 from Contact import Contact
-from Login import Login
+from Login import Login, login_form
 from Upload import Upload
 from navbar import NavBar
 import boto3
 import io
 from botocore.client import Config
-from app import app, server
+from app import app
 import os
-from s3References import session, client
+from s3References import session, client, usersNames
 
 
-app.config['suppress_callback_exceptions'] = True
-server=server
+app.config['suppress_callback_exceptions'] = False
+
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
@@ -47,7 +48,9 @@ def display_page(pathname):
         return Homepage()
     elif pathname == '/':
         return Homepage()
-    if pathname == '/PageAbout':
+    elif pathname == '/FilterData':
+        return FilteredView()
+    elif pathname == '/PageAbout':
         return About()
     elif pathname == '/PageData':
         return Data()
@@ -68,24 +71,26 @@ which page you are on
 """
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 6)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 7)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/PageHomepage":
-        return True, False, False, False, False
+        return True, False, False, False, False, False
     elif pathname == "/":
-        return True, False, False, False, False
+        return True, False, False, False, False, False
     elif pathname == "/PageAbout":
-        return False, True, False, False, False
+        return False, True, False, False, False, False
+    elif pathname == "/FilterData":
+        return False, False, True, False, False, False
     elif pathname == "/PageData":
-        return False, False, True, False, False
+        return False, False, False, True,  False, False
     elif pathname == "/PageContact":
-        return False, False, False, True, False
+        return False, False, False, False, True, False
     elif pathname == "/PageLogin":
-        return False, False, False, False, True
+        return False, False, False, False, False, True
     else:
-        return False, False, False, False, False
+        return False, False, False, False, False, False
 
 
 
