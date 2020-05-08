@@ -5,7 +5,7 @@ import dash_html_components as html
 #from tempgraphs import tnTPPlotAll
 from app import app
 import data_analysis as da
-from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json, dfMasterData
+from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json, overTimeAll, dfMasterData
 
 app.config['suppress_callback_exceptions'] = True
 
@@ -18,9 +18,8 @@ body = html.Div(
         dbc.Row(dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg"),),], className="pretty_container"),
         html.Div(
             [
-                dbc.Col([mapPlot, tn_tp_scatter_all], className="pretty_container eight columns"),
-                dbc.Col(choose2All, className="pretty_container four columns"),
-
+                dbc.Col([mapPlot, tn_tp_scatter_all], className="six columns"),
+                dbc.Col([overTimeAll, choose2All], className="five columns"),
             ], className="twelve columns"),
         html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(dfMasterData)),
     ], className="twelve columns"

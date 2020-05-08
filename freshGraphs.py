@@ -47,9 +47,19 @@ def convert_to_df(jsonified_data):
 """
 Total Phosphorus vs Total Nitrogen (Unfiltered, all data)
 """
+# This is the HTML output, it calls the graph with the id tn_tp_scatter which is pulled in an app callback
+# The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
+# This definition is pulled in homepage.py to print the output on the homepage
 
-# This definition makes the actual graph
-def tn_tp_all(current_df):
+tn_tp_scatter_all = html.Div([dcc.Graph(id="tn_tp_scatter")], className="pretty_container")
+
+# App callback for unfiltered tn/tp scatter plot.
+@app.callback(
+    Output('tn_tp_scatter', 'figure'),
+    [Input('intermediate-value', 'children')]
+)
+def update_output(jsonified_data):
+    current_df = df
     # Find MC concentration to compare to WHO/USEPA limits; filter into bins accordingly
     MC_conc = current_df['Microcystin (ug/L)']
 
@@ -89,7 +99,7 @@ def tn_tp_all(current_df):
                 size=8,
                 color="red",
             )),
-]
+    ]
     # Defines layout of graph, axis names, and legend
     layout = go.Layout(
         showlegend=True,
@@ -106,78 +116,64 @@ def tn_tp_all(current_df):
     return tnTPAllScatter
 
 
-# This is the HTML output, it calls the graph with the id tn_tp_scatter which is pulled in an app callback
-# The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
-# This definition is pulled in homepage.py to print the output on the homepage
-
-tn_tp_scatter_all = dcc.Graph(id="tn_tp_scatter")
-
-# App callback for unfiltered tn/tp scatter plot.
-@app.callback(
-    Output('tn_tp_scatter', 'figure'),
-    [Input('intermediate-value', 'children')]
-)
-def update_output(jsonified_data):
-    dff = convert_to_df(jsonified_data)
-    return tn_tp_all(df)
-
-
 
 """ 
 Choose 2 variables to compare (all data, unfiltered)
 """
 available_indicators = allColumnNames
 
-
-
 choose2All= html.Div([
-        dcc.Graph(id='crossfilter-indicator-scatter'),
-    html.Div([
-        dcc.RangeSlider(
-            id='crossfilter-year--slider',
-            min=df['Year'].min(),
-            max=df['Year'].max(),
-            value=[df['Year'].min(), df['Year'].max()],
-            marks={str(year): str(year) for year in df['Year'].unique()},
-            step=None
-        ),
-            dcc.Dropdown(
-                    id='crossfilter-xaxis-column',
-                    options=[{'label': i, 'value': i} for i in available_indicators],
-                    value='Alloxanthin (ug/L)',
-                className="eight columns",
-                ),
+    dcc.Graph(id='crossfilter-indicator-scatter'),
+    dcc.Dropdown(
+        id='crossfilter-yaxis-column',
+        options=[{'label': i, 'value': i} for i in available_indicators],
+        value='Secchi Depth (m)',
+        # className="eight columns",
+    ),
+    dcc.Dropdown(
+        id='crossfilter-xaxis-column',
+        options=[{'label': i, 'value': i} for i in available_indicators],
+        value='Microcystin (ug/L)',
+        # className="eight columns",
+    ),
+    dbc.Row(
         dcc.RadioItems(
-            id='crossfilter-xaxis-type',
-            options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-            value='Linear',
-            style={"display": "block", "margin-left": "1rem", "padding-left": "1rem"},
-            className="three columns",
-        ),
-        dcc.Dropdown(
-            id='crossfilter-yaxis-column',
-            options=[{'label': i, 'value': i} for i in available_indicators],
-            value='Cytotoxin Cylindrospermopsin (ug/L)',
-            className="eight columns",
-        ),
-        dcc.RadioItems(
-            id='crossfilter-yaxis-type',
-            options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-            value='Linear',
-            style={"display": "block", "margin-left": "1rem", "padding-left": "1rem"},
-            className="three columns",
-        ),
-    ],)
-    ],)
+            id="choose-2-scale-homepage",
+            options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                     {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
+                     {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+            value='RAW')
+    ),
+    ], className="pretty_container")
 
+@app.callback(
+    Output('crossfilter-indicator-scatter', 'figure'),
+    [Input('choose-2-scale-homepage', 'value'),
+     Input('crossfilter-xaxis-column', 'value'),
+     Input('crossfilter-yaxis-column', 'value'),
+     Input('intermediate-value', 'children')])
+def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonified_data):
+    dff = df
+    dff = dff[dff[yaxis_column_name].notnull()
+              & dff[yaxis_column_name]>0]
 
-def comp2Graph(dataframe, xaxis_column_name, yaxis_column_name, yearRange):
+    dff = dff[dff[xaxis_column_name].notnull()
+              & dff[xaxis_column_name]>0]
+
+    if selected_option == '3SD':
+        dff = dff[((dff[yaxis_column_name] - dff[yaxis_column_name].mean()) / dff[yaxis_column_name].std()).abs() < 3]
+        dff = dff[((dff[xaxis_column_name] - dff[xaxis_column_name].mean()) / dff[xaxis_column_name].std()).abs() < 3]
+
+    if selected_option == 'LOG':
+        dff[yaxis_column_name] = np.log10(dff[yaxis_column_name])
+        dff[xaxis_column_name] = np.log10(dff[xaxis_column_name])
+
     data = [
         go.Scatter(
-        x=dataframe.loc[:, xaxis_column_name],
-        y=dataframe.loc[:, yaxis_column_name],
+        x=dff[xaxis_column_name],
+        y=dff[yaxis_column_name],
         mode='markers',
-        text=dataframe.loc[:, 'Body of Water Name'],
+        text=dff['Body of Water Name'],
         marker=dict(
             size=8,
         )
@@ -185,35 +181,22 @@ def comp2Graph(dataframe, xaxis_column_name, yaxis_column_name, yearRange):
     ]
 
     layout = go.Layout(
-        title='Raw Data Comparison of any X/Y',
-        title_x=0.5,
+        title={
+            'text': xaxis_column_name + ' vs ' + yaxis_column_name,
+        'x': 0.5,},
         xaxis=dict(
-            title=xaxis_column_name),
+            title=xaxis_column_name,
+        ),
+
         yaxis=dict(
-            title=yaxis_column_name),
+            title=yaxis_column_name,
+    ),
         hovermode='closest'
     )
-    com2 = go.Figure(data=data, layout=layout)
-    return com2
+    allChoose2 = go.Figure(data=data, layout=layout)
+    return allChoose2
 
 
-@app.callback(
-    dash.dependencies.Output('crossfilter-indicator-scatter', 'figure'),
-    [dash.dependencies.Input('crossfilter-xaxis-column', 'value'),
-     dash.dependencies.Input('crossfilter-yaxis-column', 'value'),
-     dash.dependencies.Input('crossfilter-year--slider', 'value')])
-def update_graph(xaxis_column_name, yaxis_column_name,
-                 year_value):
-    if type(year_value) is not list:
-        year_value = [year_value]
-
-    yearRange = list(range(year_value[0], year_value[1]+1, 1))
-
-
-    selected_data = df[(df['Year'].isin(yearRange))]
-
-    #dff = df[df['Year'] == year_value]
-    return comp2Graph(selected_data, xaxis_column_name, yaxis_column_name, yearRange)
 
 
 
@@ -295,10 +278,125 @@ def geo_concentration_plot(selected_data):
     [Input('intermediate-value', 'children')]
 )
 def update_output(jsonified_data):
-    dff = convert_to_df(jsonified_data)
-    return geo_concentration_plot(dff)
+    data = []
+    opacity_level = 0.8
+    MC_conc = df['Microcystin (ug/L)']
+    # make bins
+    b1 = df[MC_conc <= USEPA_LIMIT]
+    b2 = df[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+    b3 = df[MC_conc > WHO_LIMIT]
+    data.append(go.Scattermapbox(
+        lon=b1['LONG'],
+        lat=b1['LAT'],
+        mode='markers',
+        text=b1["Body of Water Name"],
+        visible=True,
+        name="MC <= USEPA Limit",
+        marker=dict(color="green", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b2['LONG'],
+        lat=b2['LAT'],
+        mode='markers',
+        text=b2["Body of Water Name"],
+        visible=True,
+        name="MC <= WHO Limit",
+        marker=dict(color="orange", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b3['LONG'],
+        lat=b3['LAT'],
+        mode='markers',
+        text=b3["Body of Water Name"],
+        visible=True,
+        name="MC > WHO Limit",
+        marker=dict(color="red", opacity=opacity_level)))
+    fig = dict(data=data, layout=layout)
+    return fig
 
-mapPlot = dcc.Graph(id='map_MCConc')
+mapPlot = html.Div([dcc.Graph(id="map_MCConc")], className="pretty_container")
+
+
+
+overTimeAll= html.Div([
+    dcc.Graph(id='over-time-indicator-scatter'),
+    dcc.Dropdown(
+            id='over-time-yaxis-column',
+            options=[{'label': i, 'value': i} for i in available_indicators],
+            value='Microcystin (ug/L)',
+            #className="eight columns",
+    ),
+    dbc.Row(
+        dcc.RadioItems(
+            id="over-time-scale-homepage",
+            options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                     {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
+                     {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+            value='RAW')
+    ),
+    ],className="pretty_container")
+
+
+
+@app.callback(
+    Output('over-time-indicator-scatter', 'figure'),
+    [Input('over-time-scale-homepage', 'value'),
+     Input('over-time-yaxis-column', 'value'),
+     Input('intermediate-value', 'children')])
+def update_graph(selected_option, yaxis_column_name, jsonified_data):
+    dff = df
+    dff = dff[dff[yaxis_column_name].notnull()
+              & dff[yaxis_column_name]>0]
+
+    if selected_option == '3SD':
+        dff = dff[((dff[yaxis_column_name] - dff[yaxis_column_name].mean()) / dff[yaxis_column_name].std()).abs() < 3]
+
+    if selected_option == 'LOG':
+        dff[yaxis_column_name] = np.log10(dff[yaxis_column_name])
+
+    data = [
+        go.Scatter(
+        x=dff["Year"],
+        y=dff[yaxis_column_name],
+        mode='markers',
+        text=dff['Body of Water Name'],
+        marker=dict(
+            size=8,
+        )
+    ),
+    ]
+
+    layout = go.Layout(
+        title={
+            'text': yaxis_column_name + ' Over Time',
+        'x': 0.5,},
+        xaxis=dict(
+            title="Date",
+            dtick=1,
+        ),
+
+        yaxis=dict(
+            title=yaxis_column_name,
+    ),
+        hovermode='closest'
+    )
+    com2 = go.Figure(data=data, layout=layout)
+    return com2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 """""""""""
@@ -321,18 +419,30 @@ Total Phosphorus vs Total Nitrogen (filtered data)
 # This definition is pulled in homepage.py to print the output on the homepage
 
 def filter_dataframe(df, lake_name, year_slider):
-    if type(year_slider) is not list:
-        year_slider = [year_slider]
+    if type(lake_name) is not list:
+        lake_name = [lake_name]
 
     yearRange = list(range(year_slider[0], year_slider[1]+1, 1))
 
     dff = df[df['Body of Water Name'].isin(lake_name)
-             & (df['Year'].isin(yearRange))]
+             & (df['Year'].isin(yearRange))
+    ]
     return dff
 
 
 
-def tn_tp_filtered(current_df):
+tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], className="pretty_container")
+
+
+@app.callback(Output('tn_tp_filter_scatter', 'figure'),
+              [Input('intermediate-value', 'children'),
+               Input('lake_statuses', 'value'),
+               Input('filter-year-slider', 'value')],
+              )
+def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value):
+    current_df = filter_dataframe(df, lake_statuses, year_value)
+
+
     # Find MC concentration to compare to WHO/USEPA limits; filter into bins accordingly
     MC_conc = current_df['Microcystin (ug/L)']
 
@@ -372,10 +482,10 @@ def tn_tp_filtered(current_df):
                 size=8,
                 color="red",
             )),
-]
+    ]
     # Defines layout of graph, axis names, and legend
     layout = go.Layout(
-        showlegend=True,
+        legend=dict(font=dict(size=10), orientation='h'),
         title='Total Nitrogen vs Total Phosphorus',
         title_x=0.5,
         xaxis=dict(
@@ -389,21 +499,6 @@ def tn_tp_filtered(current_df):
     return tnTPAllFilteredScatter
 
 
-tn_tp_scatter_filter = dcc.Graph(id="tn_tp_filter_scatter")
-
-@app.callback(Output('tn_tp_filter_scatter', 'figure'),
-              [Input('intermediate-value', 'children'),
-               Input('lake_statuses', 'value'),
-               Input('filter-year-slider', 'value')],
-              )
-def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value):
-    df = convert_to_df(jsonified_data)
-    dff = filter_dataframe(df, lake_statuses, year_value)
-    return tn_tp_filtered(dff)
-
-
-
-
 @app.callback(Output('lake_text', 'children'),
               [Input('lake_statuses', 'value'),
                Input('year_slider', 'value')])
@@ -413,28 +508,56 @@ def update_well_text(well_statuses, year_slider):
     return dff['Body of Water Name'].nunique()
 
 
-choose2Filtered= html.Div([
-        dcc.Graph(id='filtered-crossfilter-indicator-scatter'),
-    html.Div([
-        dcc.Dropdown(
-            id='filtered-crossfilter-yaxis-column',
+
+
+
+
+# Any Y over time filtered graph
+
+overTimeFiltered= html.Div([
+    dcc.Graph(id='filtered-over-time-indicator-scatter'),
+    dcc.Dropdown(
+            id='filtered-over-time-yaxis-column',
             options=[{'label': i, 'value': i} for i in available_indicators],
-            value='Cytotoxin Cylindrospermopsin (ug/L)',
-            className="eight columns",
-        ),
-    ],)
-    ],)
+            value='Microcystin (ug/L)',
+            #className="eight columns",
+    ),
+    dbc.Row(
+        dcc.RadioItems(
+            id="over-time-scale",
+            options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                     {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
+                     {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+            value='RAW')
+    ),
+    ],className="pretty_container")
 
 
-def comp2GraphFiltered(dataframe, yaxis_column_name, yearRange):
-    x.index = yearRange
+
+@app.callback(
+    Output('filtered-over-time-indicator-scatter', 'figure'),
+    [Input('over-time-scale', 'value'),
+     Input('filtered-over-time-yaxis-column', 'value'),
+     Input('lake_statuses', 'value'),
+     Input('intermediate-value', 'children'),
+     dash.dependencies.Input('filter-year-slider', 'value')])
+def update_graph(selected_option, yaxis_column_name, lake_statuses, jsonified_data, year_value):
+    dff = filter_dataframe(df, lake_statuses, year_value)
+    dff = dff[dff[yaxis_column_name].notnull()
+              & dff[yaxis_column_name]>0]
+
+    if selected_option == '3SD':
+        dff = dff[((dff[yaxis_column_name] - dff[yaxis_column_name].mean()) / dff[yaxis_column_name].std()).abs() < 3]
+
+    if selected_option == 'LOG':
+        dff[yaxis_column_name] = np.log10(dff[yaxis_column_name])
 
     data = [
         go.Scatter(
-        x=x.index,
-        y=dataframe.loc[:, yaxis_column_name],
+        x=dff["Year"],
+        y=dff[yaxis_column_name],
         mode='markers',
-        text=dataframe.loc[:, 'Body of Water Name'],
+        text=dff['Body of Water Name'],
         marker=dict(
             size=8,
         )
@@ -442,30 +565,157 @@ def comp2GraphFiltered(dataframe, yaxis_column_name, yearRange):
     ]
 
     layout = go.Layout(
-        title='Raw Data Comparison of any Y over time',
+        title={
+            'text': yaxis_column_name + ' Over Time',
+        'x': 0.5,},
         xaxis=dict(
-            title="Date"),
+            title="Date",
+            dtick=1,
+        ),
+
         yaxis=dict(
-            title=yaxis_column_name),
+            title=yaxis_column_name,
+    ),
         hovermode='closest'
     )
     com2 = go.Figure(data=data, layout=layout)
     return com2
 
 
+
+
+
+
+
+
+
+# Any X/Y filtered graph
+
+choose2Filtered= html.Div([
+    dcc.Graph(id='filtered-crossfilter-indicator-scatter'),
+    dcc.Dropdown(
+        id='filtered-crossfilter-yaxis-column',
+        options=[{'label': i, 'value': i} for i in available_indicators],
+        value='Secchi Depth (m)',
+        # className="eight columns",
+    ),
+    dcc.Dropdown(
+        id='filtered-crossfilter-xaxis-column',
+        options=[{'label': i, 'value': i} for i in available_indicators],
+        value='Microcystin (ug/L)',
+        # className="eight columns",
+    ),
+    dbc.Row(
+        dcc.RadioItems(
+            id="choose-2-scale",
+            options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                     {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
+                     {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+            value='RAW')
+    ),
+    ],className="pretty_container")
+
+
+
+# Any Y over time filtered graph
 @app.callback(
-    dash.dependencies.Output('filtered-crossfilter-indicator-scatter', 'figure'),
-    [dash.dependencies.Input('filtered-crossfilter-yaxis-column', 'value'),
+    Output('filtered-crossfilter-indicator-scatter', 'figure'),
+    [Input('choose-2-scale', 'value'),
+     Input('filtered-crossfilter-xaxis-column', 'value'),
+     Input('filtered-crossfilter-yaxis-column', 'value'),
      Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
      dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(yaxis_column_name, lake_statuses, jsonified_data, year_value):
-    df = convert_to_df(jsonified_data)
+def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_statuses, jsonified_data, year_value):
+    dff = filter_dataframe(df, lake_statuses, year_value)
+    dff = dff[dff[yaxis_column_name].notnull()
+              & dff[yaxis_column_name]>0]
 
-    if type(year_value) is not list:
-        year_value = [year_value]
+    dff = dff[dff[xaxis_column_name].notnull()
+              & dff[xaxis_column_name]>0]
 
-    yearRange = list(range(year_value[0], year_value[1]+1, 1))
-    dff = filter_dataframe(df, lake_statuses, yearRange)
+    if selected_option == '3SD':
+        dff = dff[((dff[yaxis_column_name] - dff[yaxis_column_name].mean()) / dff[yaxis_column_name].std()).abs() < 3]
+        dff = dff[((dff[xaxis_column_name] - dff[xaxis_column_name].mean()) / dff[xaxis_column_name].std()).abs() < 3]
 
-    return comp2GraphFiltered(dff, yaxis_column_name, yearRange)
+    if selected_option == 'LOG':
+        dff[yaxis_column_name] = np.log10(dff[yaxis_column_name])
+        dff[xaxis_column_name] = np.log10(dff[xaxis_column_name])
+
+
+    data = [
+        go.Scatter(
+        x=dff[xaxis_column_name],
+        y=dff[yaxis_column_name],
+        mode='markers',
+        text=dff['Body of Water Name'],
+        marker=dict(
+            size=8,
+        )
+    ),
+    ]
+
+    layout = go.Layout(
+        title={
+            'text': xaxis_column_name + ' vs ' + yaxis_column_name,
+        'x': 0.5,},
+        xaxis=dict(
+            title=xaxis_column_name,
+        ),
+
+        yaxis=dict(
+            title=yaxis_column_name,
+    ),
+        hovermode='closest'
+    )
+    filteredChoose2 = go.Figure(data=data, layout=layout)
+    return filteredChoose2
+
+
+
+
+# Map plot filtered data
+
+@app.callback(
+    Output('map_MCConc_Filtered', 'figure'),
+    [Input('lake_statuses', 'value'),
+     Input('intermediate-value', 'children'),
+     dash.dependencies.Input('filter-year-slider', 'value')])
+def update_graph(lake_statuses, jsonified_data, year_value):
+    selected_data = filter_dataframe(df, lake_statuses, year_value)
+    data = []
+    opacity_level = 0.8
+    MC_conc = selected_data['Microcystin (ug/L)']
+    # make bins
+    b1 = selected_data[MC_conc <= USEPA_LIMIT]
+    b2 = selected_data[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+    b3 = selected_data[MC_conc > WHO_LIMIT]
+    data.append(go.Scattermapbox(
+        lon=b1['LONG'],
+        lat=b1['LAT'],
+        mode='markers',
+        text=b1["Body of Water Name"],
+        visible=True,
+        name="MC <= USEPA Limit",
+        marker=dict(color="green", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b2['LONG'],
+        lat=b2['LAT'],
+        mode='markers',
+        text=b2["Body of Water Name"],
+        visible=True,
+        name="MC <= WHO Limit",
+        marker=dict(color="orange", opacity=opacity_level)))
+    data.append(go.Scattermapbox(
+        lon=b3['LONG'],
+        lat=b3['LAT'],
+        mode='markers',
+        text=b3["Body of Water Name"],
+        visible=True,
+        name="MC > WHO Limit",
+        marker=dict(color="red", opacity=opacity_level)))
+    fig = dict(data=data, layout=layout)
+    return fig
+
+
+mapPlotFiltered = html.Div([dcc.Graph(id="map_MCConc_Filtered")], className="pretty_container")

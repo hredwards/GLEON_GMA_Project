@@ -42,6 +42,7 @@ for i in lakeName*10:
 
 print(len(lakeIDs))
 
+lakeNames = dict(zip(lakeName, lakeName))
 
 lakeNameandID = dict(zip(lakeIDs, lakeName))
 

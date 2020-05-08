@@ -3,7 +3,7 @@ This will have the data dictionaries for any filters we may use on the app.
 """""
 
 from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
-from LakeIDGenerator import lakeNameandID
+from LakeIDGenerator import lakeNames
 
 masterFile = "data/MasterData.csv"
 
@@ -43,7 +43,7 @@ month_Controls = dict(
  #   'LakeID': "LakeName",
 #}
 
-LAKES=lakeNameandID
+LAKES=lakeNames
 
 COUNTRIES = dict(
     USA = "USA",

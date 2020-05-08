@@ -502,7 +502,7 @@ def parse_new_database(new_dbinfo, new_df):
                                'TP_mgL': 'Total Phosphorus (ug/L)',
                                'TN_mgL': 'Total Nitrogen (ug/L)',
                                'NO3NO2_mgL': 'NO3 NO2 (mg/L)',
-                               'NH4_mgL': 'NH4 (mg/L)',
+                               'NH3_mgL': 'NH3 (mg/L)',
                                'PO4_ugL': 'PO4 (ug/L)',
                                'Chlorophylla_ugL': 'Total Chlorophyll a (ug/L)',
                                'Chlorophyllb_ugL': 'Total Chlorophyll b (ug/L)',

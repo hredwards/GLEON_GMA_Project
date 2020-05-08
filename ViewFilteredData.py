@@ -6,7 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from app import app
 import data_analysis as da
-from freshGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlot, convert_to_json
+from freshGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlotFiltered, convert_to_json, overTimeFiltered
 from s3References import dfMasterData
 from controls import month_Controls, LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, data_Review_options
 
@@ -207,14 +207,13 @@ body = html.Div(
 
         html.Div(
             [
-                dbc.Col([filtersAvailable, choose2Filtered], className="four columns"),
-                dbc.Col([mapPlot, tn_tp_scatter_filter], className="pretty_container eight columns"),
+                dbc.Col([filtersAvailable], className="three columns"),
+                dbc.Col([mapPlotFiltered, tn_tp_scatter_filter], className="five columns", style={'height':'100%'}),
+                dbc.Col([overTimeFiltered, choose2Filtered], className="four columns"),
             ], className="twelve columns"),
         html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(df)),
     ], className="twelve columns",
 )
-
-
 
 
 def FilteredView():
