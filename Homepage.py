@@ -2,9 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-#from tempgraphs import tnTPPlotAll
 from app import app
-import data_analysis as da
 from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json, overTimeAll, dfMasterData
 
 app.config['suppress_callback_exceptions'] = True

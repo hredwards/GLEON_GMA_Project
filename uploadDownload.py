@@ -18,9 +18,11 @@ import boto3
 import fuzzywuzzy
 from controls import month_Controls, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, data_Review_options
 from dash_reusable_components import Card, NamedSlider, NamedInlineRadioItems, HalsNamedInlineRadioItems
+import dash_table
+import urllib.parse
 
 s3 = session.resource('s3')
-
+df= dfMasterData
 
 login_form = html.Div([
     html.Form([
@@ -61,37 +63,6 @@ def get_csv_path(db_id):
 """
 Metadata
 """
-
-def update_dataframe(selected_rows):
-    """
-        update dataframe based on selected databases
-    """
-    try:
-        new_dataframe = pd.DataFrame()
-        # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
-        for row in selected_rows:
-            rowid = row["DB_ID"]
-            filepath = get_csv_path(rowid)
-            db_data = pd.read_csv(filepath)
-            new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
-
-        # Ratio of Total Nitrogen to Total Phosphorus
-        # This line causes a problem on certain datasets as the columns are strings instead of ints and will not divide, dataset dependent
-        print(new_dataframe["Total Nitrogen (ug/L)"])
-        print("Phosphorus: ", new_dataframe["Total Phosphorus (ug/L)"])
-        new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"] / new_dataframe["Total Phosphorus (ug/L)"]
-        # Ration of Microcystin to Total Chlorophyll
-        new_dataframe["Microcystin:Chlorophyll a"] = new_dataframe["Microcystin (ug/L)"] / new_dataframe[
-            "Total Chlorophyll a (ug/L)"]
-        # Percent change of microcystin
-        new_dataframe["MC Percent Change"] = new_dataframe.sort_values("DATETIME"). \
-            groupby(['LONG', 'LAT'])["Microcystin (ug/L)"]. \
-            apply(lambda x: x.pct_change()).fillna(0)
-        return new_dataframe
-    except Exception as e:
-        print("EXCEPTION: ", e)
-
-
 
 
 
@@ -394,6 +365,18 @@ def show_field_option_input(field_option):
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 """
 Upload Functionality
 """
@@ -623,212 +606,112 @@ def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publi
 
 
 
-
-@app.callback(
-    dash.dependencies.Output('download-link', 'href'),
-    [dash.dependencies.Input('export-data-button', 'n_clicks')],
-    [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
-     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
-def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
-    if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
-        selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
-        dff = update_dataframe(selected_rows)
-
-        csv_string = dff.to_csv(index=False, encoding='utf-8')
-        csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
-        return csv_string
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-def update_metadata(new_dbinfo):
-    try:
-        new_dbdf = pd.DataFrame({'DB_ID': [new_dbinfo.db_id],
-                                 'DB_name': [new_dbinfo.db_name],
-                                 'Uploaded_by': [new_dbinfo.uploaded_by],
-                                 'Upload_date': [new_dbinfo.upload_date],
-                                 'Published_url': [new_dbinfo.db_publication_url],  # url
-                                 'Field_method_url': [new_dbinfo.db_field_method_url],  # url
-                                 'Lab_method_url': [new_dbinfo.db_lab_method_url],  # url
-                                 'QA_QC_url': [new_dbinfo.db_QAQC_url],  # url
-                                 'Full_QA_QC_url': [new_dbinfo.db_full_QCQC_url],  # url
-                                 'Substrate': [new_dbinfo.db_substrate],
-                                 'Sample_type': [new_dbinfo.db_sample_type],
-                                 'Field-method': [new_dbinfo.db_field_method],
-                                 'Microcystin_method': [new_dbinfo.db_microcystin_method],
-                                 'Filter_size': [new_dbinfo.db_filter_size],
-                                 'Cell_count_method': [new_dbinfo.db_cell_count_method],
-                                 'Ancillary_data': [new_dbinfo.db_ancillary_url],
-                                 'N_lakes': [new_dbinfo.db_num_lakes],
-                                 'N_samples': [new_dbinfo.db_num_samples]})
-
-        metadataDB = pd.concat([dfMetadataDB, new_dbdf], sort=False).reset_index(drop=True)
-        metadataDB.to_csv("MetadataDB.csv", encoding='utf-8', index=False)
-        filename = str("MetadataDB.csv")
-
-        return upload_to_aws(filename, AssetsFolder)
-
-    except Exception as e:
-        print(e)
-        return 'Error saving metadata'
-        
-# Upload to the Uploaded Data Bucket in S3 upon upload
-def upload_to_aws(filename, objectName):
-    s3 = client
-    objectName = objectName+str(filename)
-
-    try:
-        s3.upload_file(filename, Bucket, objectName)
-        update_metadata(filename, AssetsFolder)
-        print("Upload Successful")
-        return True
-    except FileNotFoundError:
-        print("The file was not found")
-        return False
-    except NoCredentialsError:
-        print("Credentials not available")
-        return False
-
-@app.callback(dash.dependencies.Output('upload-output', 'children'),
-              [dash.dependencies.Input('upload-data', 'contents')],
-              [dash.dependencies.State('upload-data', 'filename')])
-def update_uploaded_file(contents, filename):
-    if contents is not None:
-        return html.Div([
-            html.H6(filename),
-        ])
-
-@app.callback(
-    dash.dependencies.Output('upload-msg', 'children'),
-    [Input('upload-button', 'n_clicks'),
-     dash.dependencies.Input('upload-data', 'contents'),
-     dash.dependencies.Input('upload-data', 'filename')],
-    [dash.dependencies.State('db-name', 'value')])
-def upload_file(n_clicks, contents, filename, dbname):
-    if n_clicks != None and n_clicks > 0:
-        if dbname == None or not dbname.strip():
-            return 'Database name cannot be empty.'
-        elif contents is None:
-            return 'Please select a file.'
-        else:
-            dbname = str(dbname)
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-
-            try:
-                if 'csv' in filename or 'xls' in filename:
-                    # Assume that the user uploaded a CSV file
-                    filename = str(filename)
-                    return upload_to_aws(filename, UploadFolder)
-
-                else:
-                    return 'Invalid file type.'
-            except Exception as e:
-                print(e)
-                return 'There was an error processing this file.'
-
-
-
-## Append new data to the master set
-
-
-
-
-
-
-
-
-"""
-
-
-
-
-
-
-
-
-
-
-"""
-This was working but didn't take in metadata
-
-def upload_to_aws(filename):
-    s3 = client
-    objectName = uploadBucket+str(filename)
-
-    try:
-        s3.upload_file(filename, Bucket, objectName)
-        print("Upload Successful")
-        return True
-    except FileNotFoundError:
-        print("The file was not found")
-        return False
-    except NoCredentialsError:
-        print("Credentials not available")
-        return False
-
-@app.callback(dash.dependencies.Output('upload-output', 'children'),
-              [dash.dependencies.Input('upload-data', 'contents')],
-              [dash.dependencies.State('upload-data', 'filename')])
-def update_uploaded_file(contents, filename):
-    if contents is not None:
-        return html.Div([
-            html.H6(filename),
-        ])
-
-@app.callback(
-    dash.dependencies.Output('upload-msg', 'children'),
-    [Input('upload-button', 'n_clicks'),
-     dash.dependencies.Input('upload-data', 'contents'),
-     dash.dependencies.Input('upload-data', 'filename')],
-    [dash.dependencies.State('db-name', 'value')])
-def upload_file(n_clicks, contents, filename, dbname):
-    if n_clicks != None and n_clicks > 0:
-        if dbname == None or not dbname.strip():
-            return 'Database name cannot be empty.'
-        elif contents is None:
-            return 'Please select a file.'
-        else:
-            dbname = str(dbname)
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-
-            try:
-                if 'csv' in filename or 'xls' in filename:
-                    # Assume that the user uploaded a CSV file
-                    filename = str(filename)
-                    return upload_to_aws(filename)
-
-                else:
-                    return 'Invalid file type.'
-            except Exception as e:
-                print(e)
-                return 'There was an error processing this file.'
-
-"""
-
-
-
-
-
 """
 Download Bar
 """
 
+## Download Layout
 
+refreshButton = html.Button(id='refresh-db-button', children='Refresh',
+            style={
+                'margin': '10px 0px 10px 0px'
+            }
+            ),
+
+
+
+def get_metadata_table_content(current_metadata):
+    '''
+        returns the data for the specified columns of the metadata data table
+    '''
+
+    table_df = current_metadata[
+        ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Microcystin_method', 'N_lakes', 'N_samples']]
+    return table_df.to_dict("rows")
+
+
+
+
+
+
+
+
+dataPageTable = html.Div([
+dash_table.DataTable(
+        id='metadata_table',
+        columns=[
+            # the column names are seen in the UI but the id should be the same as dataframe col name
+            # the DB ID column is hidden - later used to find DB pkl files in the filtering process
+            # TODO: add column for field method in table
+            {'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
+            {'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
+            {'name': 'Database Name', 'id': 'DB_name'},
+            {'name': 'Uploaded By', 'id': 'Uploaded_by'},
+            {'name': 'Upload Date', 'id': 'Upload_date'},
+            {'name': 'Microcystin Method', 'id': 'Microcystin_method'},
+            {'name': 'Number of Lakes', 'id': 'N_lakes'},
+            {'name': 'Number of Samples', 'id': 'N_samples'}, ],
+        data=get_metadata_table_content(dfMetadataDB),
+        row_selectable='multi',
+        selected_rows=[],
+        style_as_list_view=True,
+        # sorting=True,
+        #style_table={'overflowX': 'scroll'},
+        style_cell={'textAlign': 'left'},
+        style_header={
+            'backgroundColor': 'white',
+            'fontWeight': 'bold'
+        },
+    ),
+
+    # Export the selected datasets in a single csv file
+    html.A(html.Button(id='export-data-button', children='Download Selected Data',
+                       style={
+                           'margin': '10px 0px 10px 10px'
+                       }),
+           href='',
+           id='download-link',
+           download='data.csv',
+           target='_blank'
+           ),
+])
+
+
+
+## Download Functionality
+
+
+#need to figure this out; here is old code + a new function to download desired data from S3. need to figure out concat desired data
+@app.callback(
+    Output('download-link', 'href'),
+    [Input('export-data-button', 'n_clicks')],
+    [State('metadata_table', 'derived_virtual_selected_rows'),
+     State('metadata_table', 'derived_virtual_data')])
+def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
+    if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
+        selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
+
+        try:
+            new_dataframe = pd.DataFrame()
+            # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
+            for row in selected_rows:
+                rowid = row["RefID"]
+                db_data = df[df['RefID']==rowid]
+                new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
+            dff= new_dataframe
+            csv_string = dff.to_csv(index=False, encoding='utf-8')
+            csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
+            return csv_string
+        except Exception as e:
+            print("EXCEPTION: ", e)
+
+
+
+
+def download_s3_file(filename):
+    key = "UploadedData/" + filename + ".csv"
+    print(key)
+    s3File = client.get_object(Bucket='gleongmabucket', Key=key)
+    dfS3File = pd.read_csv(io.BytesIO(s3File['Body'].read()))
+    return dfS3File
 

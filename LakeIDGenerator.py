@@ -25,7 +25,7 @@ print(lakeNames)
 
 masterDataPandaFrame.apply(set)
 
-lakeName = list(masterDataPandaFrame.apply(set)[1])
+lakeName = list(masterDataPandaFrame.apply(set)[2])
 lakeName = sorted(lakeName)
 
 print(len(lakeName))

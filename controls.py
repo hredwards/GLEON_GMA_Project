@@ -83,11 +83,11 @@ Field_Methods = dict(
     SIS = 'Spatially Integrated Sample',
 )
 
-Microcystin_Method = dict(
-    PPIA = 'PPIA',
-    ELISA = 'ELISA',
-    LCMSMS = 'LC-MSMS',
-)
+Microcystin_Method = {
+    'PPIA' : 'PPIA',
+    'ELISA' : 'ELISA',
+    'LC-MSMS' : 'LC-MSMS'
+}
 
 
 ## Data

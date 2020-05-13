@@ -8,7 +8,8 @@ from app import app
 import data_analysis as da
 from freshGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlotFiltered, convert_to_json, overTimeFiltered
 from s3References import dfMasterData
-from controls import month_Controls, LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, Sample_Types_options, Field_Methods_options, Microcystin_Method_options, data_Review_options
+from controls import month_Controls, LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, \
+    Sample_Types_options, Field_Methods_options, Microcystin_Method, Microcystin_Method_options, data_Review_options
 
 app.config['suppress_callback_exceptions'] = True
 df = dfMasterData
@@ -78,9 +79,32 @@ filtersAvailable = html.Div(
                             className="dcc_control",
                             style={'display': 'none'}
                         ),
+                        html.P(
+                            'Filter by Microcystin Method:',
+                            className="control_label"
+                        ),
+                        dcc.RadioItems(
+                            id='microcystin_selector',
+                            options=[
+                                {'label': 'All ', 'value': 'all'},
+                                {'label': 'Customize ', 'value': 'custom'}
+                            ],
+                            value='all',
+                            labelStyle={"display": "inline-block",
+                                        "margin-right": "1rem",
+                                        "font-weight": "300"},
+                            className="dcc_control"
+                        ),
+                        dcc.Dropdown(
+                            id='microcystin_types',
+                            options=Microcystin_Method_options,
+                            multi=True,
+                            value=list(Microcystin_Method.keys()),
+                            className="dcc_control",
+                            style={'display': 'none'}
+                        ),
                     ], className="pretty_container"
                 )
-
 @app.callback(
     Output('lake_statuses', 'style'),
     [Input('lake_selector', 'value')]
@@ -97,6 +121,16 @@ def show_full_lake_list(lake_selection):
 )
 def show_full_lake_list(substrate_selection):
     if substrate_selection == 'custom':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    Output('microcystin_types', 'style'),
+    [Input('microcystin_selector', 'value')]
+)
+def show_full_lake_list(mc_selection):
+    if mc_selection == 'custom':
         return {'display': 'block'}
     else:
         return {'display': 'none'}

@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_table
 from app import app
 
@@ -10,7 +10,7 @@ from app import app
 import pandas as pd
 from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket
 
-
+#### I DON"T THINK WE ACTUALLY NEED THIS FILE ANY MORE, I CONSOLODATED IT WITH THE UPLOADDONWLOAD.PY FILE; LEAVING UNTIL I CAN CONFIRM IT'S NOT REFERENCED ELSEWHERE
 
 
 
@@ -77,3 +77,18 @@ dash_table.DataTable(
            target='_blank'
            ),
 ])
+
+
+@app.callback(
+    Output('download-link', 'href'),
+    [Input('apply-filters-button', 'n_clicks')],
+    [State('metadata_table', 'derived_virtual_selected_rows'),
+     State('metadata_table', 'derived_virtual_data')])
+def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
+    if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
+        selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
+        dff = db.update_dataframe(selected_rows)
+
+        csv_string = dff.to_csv(index=False, encoding='utf-8')
+        csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
+        return csv_string

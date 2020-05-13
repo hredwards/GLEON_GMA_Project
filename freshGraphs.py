@@ -10,7 +10,7 @@ import numpy as np
 from settings import months, USEPA_LIMIT, WHO_LIMIT
 import plotly.graph_objs as go
 import plotly.express as px
-from s3References import dfMasterData
+from s3References import dfMasterData, dfMetadataDB, dfexampleSheet
 
 
 app.config['suppress_callback_exceptions'] = True
@@ -19,10 +19,13 @@ app.config['suppress_callback_exceptions'] = True
 Dataframe calling/definition; calls for masterdata.csv from S3 bucket
 """
 df = dfMasterData
-
+dfMeta = dfMetadataDB
 allColumnNames = list(df.columns.values)
 df['Year'] = pd.DatetimeIndex(df['DATETIME']).year
 df['Date Reported'] = pd.to_datetime(df['DATETIME'])
+
+dfexampleSheet['Year'] = pd.DatetimeIndex(dfexampleSheet['DATETIME']).year
+dfexampleSheet['Date Reported'] = pd.to_datetime(dfexampleSheet['DATETIME'])
 
 
 
@@ -418,16 +421,54 @@ Total Phosphorus vs Total Nitrogen (filtered data)
 # The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
 # This definition is pulled in homepage.py to print the output on the homepage
 
-def filter_dataframe(df, lake_name, year_slider):
+
+def filter_dataframe(df, lake_name, microcystin_types, year_slider):
     if type(lake_name) is not list:
         lake_name = [lake_name]
 
-    yearRange = list(range(year_slider[0], year_slider[1]+1, 1))
+    if type(microcystin_types) is not list:
+        microcystin_types = [microcystin_types]
 
-    dff = df[df['Body of Water Name'].isin(lake_name)
-             & (df['Year'].isin(yearRange))
-    ]
+# If any filter options are empty, return an empty dataframe. This is necessary bc without it, it returns key errors or doesn't remove the very last thing user says to remove
+    if not microcystin_types:
+        dff= dfexampleSheet
+
+
+    else:
+        yearRange = list(range(year_slider[0], year_slider[1] + 1, 1))
+
+        dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)]
+
+        if dffMeta.empty:
+            dff = dfexampleSheet
+        else:
+
+            dffMeta = list(dffMeta.apply(set)[0])
+            dffMeta = sorted(dffMeta)
+
+            dff = df[df['Body of Water Name'].isin(lake_name)
+                     & (df['Year'].isin(yearRange))
+                     & (df['RefID'].isin(dffMeta))
+                     ]
+
+        """
+        
+        dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)
+                 & (dfMeta['Year'].isin(yearRange))
+                 & (dfMeta['RefID'].isin(dffMeta))
+                 ]
+        
+        """
+
+
+
+
+
     return dff
+
+
+
+
 
 
 
@@ -437,10 +478,11 @@ tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], classNam
 @app.callback(Output('tn_tp_filter_scatter', 'figure'),
               [Input('intermediate-value', 'children'),
                Input('lake_statuses', 'value'),
+               Input('microcystin_types', 'value'),
                Input('filter-year-slider', 'value')],
               )
-def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value):
-    current_df = filter_dataframe(df, lake_statuses, year_value)
+def make_filtered_TNTP_figure(jsonified_data, lake_statuses, microcystin_types, year_value):
+    current_df = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
 
 
     # Find MC concentration to compare to WHO/USEPA limits; filter into bins accordingly
@@ -540,9 +582,10 @@ overTimeFiltered= html.Div([
      Input('filtered-over-time-yaxis-column', 'value'),
      Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
+     Input('microcystin_types', 'value'),
      dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(selected_option, yaxis_column_name, lake_statuses, jsonified_data, year_value):
-    dff = filter_dataframe(df, lake_statuses, year_value)
+def update_graph(selected_option, yaxis_column_name, lake_statuses, jsonified_data, microcystin_types, year_value):
+    dff = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -625,9 +668,10 @@ choose2Filtered= html.Div([
      Input('filtered-crossfilter-yaxis-column', 'value'),
      Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
+     Input('microcystin_types', 'value'),
      dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_statuses, jsonified_data, year_value):
-    dff = filter_dataframe(df, lake_statuses, year_value)
+def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_statuses, jsonified_data, microcystin_types, year_value):
+    dff = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -680,9 +724,11 @@ def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_sta
     Output('map_MCConc_Filtered', 'figure'),
     [Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
+     Input('microcystin_types', 'value'),
      dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(lake_statuses, jsonified_data, year_value):
-    selected_data = filter_dataframe(df, lake_statuses, year_value)
+def update_graph(lake_statuses, jsonified_data, microcystin_types , year_value):
+    selected_data = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
+
     data = []
     opacity_level = 0.8
     MC_conc = selected_data['Microcystin (ug/L)']

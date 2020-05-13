@@ -40,8 +40,13 @@ dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
 
 
 ## Example Datasheet
-exampleSheet = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_Example.xlsx')
-dfexampleSheet = pd.read_excel(io.BytesIO(exampleSheet['Body'].read()))
+#exampleSheet = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_Example.xlsx')
+#dfexampleSheet = pd.read_excel(io.BytesIO(exampleSheet['Body'].read()))
+
+
+## Example CSV Datasheet
+exampleSheet = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_EXAMPLE.csv')
+dfexampleSheet = pd.read_csv(io.BytesIO(exampleSheet['Body'].read()))
 
 
 ## User credentials/login
