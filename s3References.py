@@ -66,8 +66,8 @@ dfexampleSheet = pd.read_csv(io.BytesIO(exampleSheet['Body'].read()))
 ## Blank outline csv for graphs to reference when no filters met -- not for users
 csvOutline = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_OUTLINE.csv')
 dfcsvOutline = pd.read_csv(io.BytesIO(csvOutline['Body'].read()))
-
-
+dfcsvOutline.rename(columns={'Date': 'DATETIME', },
+              inplace=True)
 
 ## User credentials/login
 creds = client.get_object(Bucket='gleongmabucket', Key='logins.csv')
