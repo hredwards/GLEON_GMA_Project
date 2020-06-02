@@ -26,14 +26,28 @@ UploadFolder='UploadedData/'
 AssetsFolder='Assets/'
 
 
-#session = boto3.Session(profile_name="eb-cli")
-session = boto3.session.Session(aws_access_key_id=os.environ['S3_KEY'], aws_secret_access_key=os.environ['S3_SECRET'])
+session = boto3.Session(profile_name="eb-cli")
+#session = boto3.session.Session(aws_access_key_id=os.environ['S3_KEY'], aws_secret_access_key=os.environ['S3_SECRET'])
 client = session.client('s3')
 
 
 ## MasterData and MetaData
 MasterData = client.get_object(Bucket='gleongmabucket', Key='Assets/MasterData.csv')
 dfMasterData = pd.read_csv(io.BytesIO(MasterData['Body'].read()))
+
+def pullMasterdata():
+    MasterData = client.get_object(Bucket='gleongmabucket', Key='Assets/MasterData.csv')
+    dfMasterData = pd.read_csv(io.BytesIO(MasterData['Body'].read()))
+    dfMasterData['Year'] = pd.DatetimeIndex(dfMasterData['DATETIME']).year
+    dfMasterData['Month'] = pd.DatetimeIndex(dfMasterData['DATETIME']).month
+    dfMasterData['Date Reported'] = pd.to_datetime(dfMasterData['DATETIME'])
+    return dfMasterData
+
+def pullMetaDB():
+    MetadataDB = client.get_object(Bucket='gleongmabucket', Key='Assets/MetadataDB.csv')
+    dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
+    return dfMetadataDB
+
 
 MetadataDB = client.get_object(Bucket='gleongmabucket', Key='Assets/MetadataDB.csv')
 dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
@@ -44,9 +58,15 @@ dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
 #dfexampleSheet = pd.read_excel(io.BytesIO(exampleSheet['Body'].read()))
 
 
-## Example CSV Datasheet
+## blank example CSV Datasheet for users to fill out
 exampleSheet = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_EXAMPLE.csv')
 dfexampleSheet = pd.read_csv(io.BytesIO(exampleSheet['Body'].read()))
+
+
+## Blank outline csv for graphs to reference when no filters met -- not for users
+csvOutline = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_OUTLINE.csv')
+dfcsvOutline = pd.read_csv(io.BytesIO(csvOutline['Body'].read()))
+
 
 
 ## User credentials/login

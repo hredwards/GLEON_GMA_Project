@@ -89,14 +89,14 @@ body = html.Div(
         dbc.Row(
             [
                 html.Div([
-                    dbc.Row(html.H3("Gleon GMA Project - About"), style={'width':'100%', 'text-align':'center'}),
-                    html.P(
+                    dbc.Row(html.H3("Gleon GMA Project - About"), style={'width':'100%', 'text-align':'center'}, justify="center", form=True),
+                        dbc.Row(html.P(
                                         "The goal of the Global Microcystin Aggregation (GMA) project is to compile a global spatial/temporal"
                                         "dataset of freshwater microcystin and associated physicochemical water quality (e.g., TN, TP, Chl, Secchi, "
                                         "temperature, etc.), lake morphology (e.g., mean depth, volume, surface area), and watershed (e.g., land use "
                                         "metrics, watershed area) data to:"
-                                    ),
-                                    html.Ol(
+                                    ), style={"padding-left":"4rem", "padding-right":"4rem", "text-size":"3rem"}),
+                                    dbc.Row(html.Ol(
                                         children=[
                                             html.Li(
                                                 "Describe the occurrence and concentrations of microcystins on a global spatial scale."),
@@ -116,22 +116,18 @@ body = html.Div(
                                                 ],
                                             ),
                                         ],
-                                    ),
-                                ], className='pretty_container seven columns'),
-                                        html.Section(id="slideshow", children=[
-                                            html.Div(id="slideshow-container", children=[
-                                                html.Div(id="image"),
-                                                dcc.Interval(id='interval', interval=6000),
-                                            ]),
-                                        ],className='pretty_container five columns')]),
-        html.Div(
-            [
-                dbc.Row(html.H4("If you are interested in the project or have data to contribute, please contact us!", style={'textAlign':'center'})),
-                dbc.Row(dbc.Button("Contact Us!", href="/PageContact", color="secondary", size="lg", className="mr-1",
-                           style={'textAlign': 'center'}))
+                                    ), style={"padding-left":"6rem", "padding-right":"6rem", "text-size":"3rem"}),
+                    dbc.Row(html.H4("If you are interested in the project or have data to contribute, please contact us!", style={'textAlign': 'center', "padding-top":"5rem"}), justify="center", form=True),
+                    dbc.Row(dbc.Button("Contact Us!", href="/PageContact", color="secondary", size="lg", className="mr-1", style={'textAlign': 'center'}), justify="center", form=True),
+                ], style={"padding-left":"4rem", "padding-right":"4rem", "text-size":"4rem"}, className='pretty_container six columns'),
 
-            ], className="pretty_container",
-            ),
+
+                    html.Section(id="slideshow", children=[
+                        html.Div(id="slideshow-container",
+                                 children=[html.Div(id="image"),
+                                           dcc.Interval(id='interval', interval=6000),
+                                           ]),
+                    ],className='pretty_container six columns')]),
        ], className="twelve columns"
 )
 

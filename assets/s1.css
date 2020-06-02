@@ -34,8 +34,7 @@
 /* For devices larger than 400px */
 @media (min-width: 400px) {
   .container {
-    width: 90%;
-    padding: 0; }
+    width: 90%;}
 }
 
 /* For devices larger than 550px */
@@ -43,9 +42,9 @@
   .container {
     width: 100%; }
   .column,
-  .columns {
+  /*.columns {
     margin-left: 0.5%; }
-  /* .column:first-child,
+  .column:first-child,
   .columns:first-child {
     margin-left: 0; }
   .column:last-child,
@@ -53,18 +52,18 @@
     margin-left: 0; } */
 
   .one.column,
-  .one.columns                    { width: 8%;             }
-  .two.columns                    { width: 16.25%;         }
-  .three.columns                  { width: 22%;            }
-  .four.columns                   { width: calc(100% / 3.1);            }
-  .five.columns                   { width: calc(100% * 5/12); }
-  .six.columns                    { width: 49.75%;          }
-  .seven.columns                  { width: calc(100% * 7.2/12); }
-  .eight.columns                  { width: 63.5%;          }
-  .nine.columns                   { width: 74.0%;          }
-  .ten.columns                    { width: 82.6666666667%; }
-  .eleven.columns                 { width: 91.5%; }
-  .twelve.columns                 { width: 100%; margin-left: 0; }
+  .one.columns                    {width: calc(100% *1/12);}
+  .two.columns                    {width: calc(100% *2/12);}
+  .three.columns                  {width: calc(100% *3/12);}
+  .four.columns                   {width: calc(100% *4/12);}
+  .five.columns                   {width: calc(100% * 5/12);}
+  .six.columns                    {width: calc(100% *6/12);}
+  .seven.columns                  {width: calc(100% *7/12);}
+  .eight.columns                  {width: calc(100% *8/12);}
+  .nine.columns                   {width: calc(100% *9/12);}
+  .ten.columns                    {width: calc(100% *10/12);}
+  .eleven.columns                 {width: calc(100% *11/12);}
+  .twelve.columns                 {width: 100%; margin-left: 0;}
 
   .one-third.column               { width: 30.6666666667%; }
   .two-thirds.column              { width: 65.3333333333%; }
@@ -105,14 +104,14 @@
 
 }
 
-/* For devices larger than 550px */
+/* For devices larger than 786px */
 @media (min-width: 786px) {
   .container {
     width: 90%; }
   .column,
-  .columns {
+  /*.columns {
     margin-left: 0.5%; }
-  /* .column:first-child,
+  .column:first-child,
   .columns:first-child {
     margin-left: 0; }
   .column:last-child,
@@ -120,18 +119,18 @@
     margin-left: 0; } */
 
   .one.column,
-  .one.columns                    { width: 8%;             }
-  .two.columns                    { width: 16.25%;         }
-  .three.columns                  { width: 22%;            }
-  .four.columns                   { width: calc(100% / 3.1);            }
-  .five.columns                   { width: calc(100% * 5/12); }
-  .six.columns                    { width: 49.75%;          }
-  .seven.columns                  { width: calc(100% * 7.2/12); }
-  .eight.columns                  { width: 63.5%;          }
-  .nine.columns                   { width: 74.0%;          }
-  .ten.columns                    { width: 82.6666666667%; }
-  .eleven.columns                 { width: 91.5%; }
-  .twelve.columns                 { width: 100%; margin-left: 0; }
+  .one.columns                    {width: calc(100% *1/12);}
+  .two.columns                    {width: calc(100% *2/12);}
+  .three.columns                  {width: calc(100% *3/12);}
+  .four.columns                   {width: calc(100% *4/12);}
+  .five.columns                   {width: calc(100% * 5/12);}
+  .six.columns                    {width: calc(100% *6/12);}
+  .seven.columns                  {width: calc(100% *7/12);}
+  .eight.columns                  {width: calc(100% *8/12);}
+  .nine.columns                   {width: calc(100% *9/12);}
+  .ten.columns                    {width: calc(100% *10/12);}
+  .eleven.columns                 {width: calc(100% *11/12);}
+  .twelve.columns                 {width: 100%; margin-left: 0;}
 
   .one-third.column               { width: 30.6666666667%; }
   .two-thirds.column              { width: 65.3333333333%; }
@@ -173,14 +172,15 @@
 }
 
 
-/* For devices larger than 550px */
+/* For devices larger than 1200 */
 @media (min-width: 1200px) {
   .container {
-    width: 100%; }
+    width: 100%;
+    height:100%;}
   .column,
-  .columns {
+  /*.columns {
     margin-left: 0.5%; }
-  /* .column:first-child,
+  .column:first-child,
   .columns:first-child {
     margin-left: 0; }
   .column:last-child,
@@ -188,18 +188,18 @@
     margin-left: 0; } */
 
   .one.column,
-  .one.columns                    { width: 8%;             }
-  .two.columns                    { width: 16.25%;         }
-  .three.columns                  { width: 22%;            }
-  .four.columns                   { width: calc(100% / 3.1);            }
-  .five.columns                   { width: calc(100% * 5/12); }
-  .six.columns                    { width: 49.75%;          }
-  .seven.columns                  { width: calc(100% * 7.2/12); }
-  .eight.columns                  { width: 63.5%;          }
-  .nine.columns                   { width: 74.0%;          }
-  .ten.columns                    { width: 82.6666666667%; }
-  .eleven.columns                 { width: 91.5%; }
-  .twelve.columns                 { width: 100%; margin-left: 0; }
+  .one.columns                    {width: calc(100% *1/12);}
+  .two.columns                    {width: calc(100% *2/12);}
+  .three.columns                  {width: calc(100% *3/12);}
+  .four.columns                   {width: calc(100% *4/12);}
+  .five.columns                   {width: calc(100% * 5/12);}
+  .six.columns                    {width: calc(100% *6/12);}
+  .seven.columns                  {width: calc(100% *7/12);}
+  .eight.columns                  {width: calc(100% *8/12);}
+  .nine.columns                   {width: calc(100% *9/12);}
+  .ten.columns                    {width: calc(100% *10/12);}
+  .eleven.columns                 {width: calc(100% *11/12);}
+  .twelve.columns                 {width: 100%; margin-left: 0; max-height:100%}
 
   .one-third.column               { width: 30.6666666667%; }
   .two-thirds.column              { width: 65.3333333333%; }
@@ -237,6 +237,15 @@
 
   .offset-by-one-half.column,
   .offset-by-one-half.columns     { margin-left: 52%; }
+
+
+
+
+  .one.row,
+  .one.rows                   {height:100vh; margin-left: 0;}
+  .two.rows                    {height: 50vh;}
+  .three.rows                  {height: 33.33vh;}
+  .four.rows                   {height: 25vh;}
 
 }
 
@@ -245,25 +254,9 @@
 /* NOTE
 html is set to 62.5% so that all the REM measurements throughout Skeleton
 are based on 10px sizing. So basically 1.5rem = 15px :) */
-html {
-  font-size: 62.5%; }
-body {
-  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
-  line-height: 1.6;
-  font-weight: 400;
-  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: rgb(50, 50, 50);
-  background-color: #F2F2F2;
-  margin: 5%;
-}
-.pretty_container {
-  border-radius: 5px;
-  background-color: #F9F9F9;
-  margin: 10px;
-  padding: 15px;
-  position: relative;
-  box-shadow: 2px 2px 2px lightgrey;
-}
+
+
+
 
 .bare_container {
   margin: 0 0 0 0;
@@ -273,19 +266,40 @@ body {
 .data_text {
     font-size;
 }
+.Select filter_box Select-multi {
+  margin: .2rem;
+  width: calc(100%-2rem);
+  height: 6rem;
+  justify=center;
+  form=true;
+  overflow:visible;
+}
+
 
 .dcc_control {
-  margin: 1rem;
+  margin: .2rem;
   padding: 1rem;
   width: calc(100%-2rem);
+  justify=center;
+  text-align:center;
+}
+
+.dcc_control_year {
+  margin: .2rem;
+  padding: .2rem;
+  width: calc(100%-2rem);
+  justify=center;
+  form=true;
 }
 
 .control_label {
   margin: 0;
-  padding: 1rem;
+  padding: .2rem;
   padding-bottom: 0px;
   margin-bottom: 0px;
   width: calc(100%-2rem);
+  text-align:center;
+  font-size:1.5rem;
 }
 
 .rc-slider {
@@ -546,10 +560,7 @@ textarea:focus,
 select:focus {
   border: 1px solid #33C3F0;
   outline: 0; }
-label,
-legend {
-  display: block;
-  margin-bottom: 0px; }
+
 fieldset {
   padding: 0;
   border-width: 0; }

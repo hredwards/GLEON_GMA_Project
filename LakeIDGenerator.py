@@ -10,8 +10,6 @@ import random
 from dataBase import masterFile
 import csv
 
-masterDataPandaFrame=dfMasterData
-
 
 """
 This code loops through the existing MasterData file and makes a list of all unique Lake Names
@@ -23,12 +21,19 @@ for row in masterFile:
 print(lakeNames)
 """
 
-masterDataPandaFrame.apply(set)
+dfMasterData.apply(set)
 
-lakeName = list(masterDataPandaFrame.apply(set)[2])
+lakeName = list(dfMasterData.apply(set)[2])
 lakeName = sorted(lakeName)
+lakeNames = dict(zip(lakeName, lakeName))
 
-print(len(lakeName))
+
+dfMetadataDB.apply(set)
+instName = list(dfMetadataDB.apply(set)[3])
+instName = sorted(instName)
+instNames = dict(zip(instName, instName))
+print(instNames)
+
 
 """
 This makes an empty csv file with the total amount of lakenames found in the file (plus 50) and makes a lake id
@@ -40,28 +45,9 @@ for i in lakeName*10:
     lakeID= random.randint(1,len(lakeName))
     lakeIDs.add(lakeID)
 
-print(len(lakeIDs))
-
-lakeNames = dict(zip(lakeName, lakeName))
 
 lakeNameandID = dict(zip(lakeIDs, lakeName))
 
-print(lakeNameandID)
-
-
-
-
-
-"""
-This code reads the lake names and creates a lakeID for each unique lake name
-"""
-#masterDF = pd.read_csv('/data/MasterData.csv')
-#masterDF['LakeID'] =
-
-
-"""
-This takes the lake names and lake IDs from above and creates a dictionary of them.
-"""
 
 
 
@@ -69,40 +55,3 @@ This takes the lake names and lake IDs from above and creates a dictionary of th
 
 
 
-
-
-
-
-## Example end results
-
-"""""
-Continent: North America
-Country: USA
-Province: NA
-Sampling Method: Scum Focused
-Field Method: Discrete Depth Sample
-Substrate: 
-
-"""""
-
-"""""
-Continent: Europe
-Country: Germany
-Province: NA
-Sampling Method:
-Field Method:
-Substrate:
-
-"""""
-
-
-
-"""""
-Continent: South America
-Country: Brazil
-Province: NA
-Sampling Method:
-Field Method:
-Substrate:
-
-"""""

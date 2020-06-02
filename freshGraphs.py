@@ -10,7 +10,7 @@ import numpy as np
 from settings import months, USEPA_LIMIT, WHO_LIMIT
 import plotly.graph_objs as go
 import plotly.express as px
-from s3References import dfMasterData, dfMetadataDB, dfexampleSheet
+from s3References import dfMasterData, dfMetadataDB, dfexampleSheet, dfcsvOutline, pullMasterdata
 
 
 app.config['suppress_callback_exceptions'] = True
@@ -18,14 +18,19 @@ app.config['suppress_callback_exceptions'] = True
 """
 Dataframe calling/definition; calls for masterdata.csv from S3 bucket
 """
-df = dfMasterData
-dfMeta = dfMetadataDB
-allColumnNames = list(df.columns.values)
-df['Year'] = pd.DatetimeIndex(df['DATETIME']).year
-df['Date Reported'] = pd.to_datetime(df['DATETIME'])
+#df = dfMasterData
+#df['Year'] = pd.DatetimeIndex(df['DATETIME']).year
+#df['Month'] = pd.DatetimeIndex(df['DATETIME']).month
+#df['Date Reported'] = pd.to_datetime(df['DATETIME'])
 
-dfexampleSheet['Year'] = pd.DatetimeIndex(dfexampleSheet['DATETIME']).year
-dfexampleSheet['Date Reported'] = pd.to_datetime(dfexampleSheet['DATETIME'])
+df = pullMasterdata()
+
+dfMeta = dfMetadataDB
+allColumnNames = list(dfMasterData.columns.values)
+
+
+dfcsvOutline['Year'] = pd.DatetimeIndex(dfcsvOutline['DATETIME']).year
+dfcsvOutline['Date Reported'] = pd.to_datetime(dfcsvOutline['DATETIME'])
 
 
 
@@ -34,7 +39,7 @@ Definitions used to convert dataframe to json list and back (used in callbacks a
 """
 
 def convert_to_json(current_dataframe):
-    # This converts the dataframe to a json file. This is necessary for app callbacks because they can't use a dataframe
+    # This converts the dataframe to a json file. This is necesary for app callbacks because they can't use a dataframe
     # as an input, only lists/tuples like a json str
     jsonStr = current_dataframe.to_json(orient='split')
     return jsonStr
@@ -54,7 +59,7 @@ Total Phosphorus vs Total Nitrogen (Unfiltered, all data)
 # The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
 # This definition is pulled in homepage.py to print the output on the homepage
 
-tn_tp_scatter_all = html.Div([dcc.Graph(id="tn_tp_scatter")], className="pretty_container")
+tn_tp_scatter_all = html.Div([dcc.Graph(id="tn_tp_scatter")], className="pretty_container graph")
 
 # App callback for unfiltered tn/tp scatter plot.
 @app.callback(
@@ -105,7 +110,7 @@ def update_output(jsonified_data):
     ]
     # Defines layout of graph, axis names, and legend
     layout = go.Layout(
-        showlegend=True,
+        legend=dict(font=dict(size=10), orientation='h'),
         title='Total Nitrogen vs Total Phosphorus',
         title_x=0.5,
         xaxis=dict(
@@ -127,27 +132,41 @@ available_indicators = allColumnNames
 
 choose2All= html.Div([
     dcc.Graph(id='crossfilter-indicator-scatter'),
-    dcc.Dropdown(
-        id='crossfilter-yaxis-column',
-        options=[{'label': i, 'value': i} for i in available_indicators],
-        value='Secchi Depth (m)',
-        # className="eight columns",
-    ),
-    dcc.Dropdown(
-        id='crossfilter-xaxis-column',
-        options=[{'label': i, 'value': i} for i in available_indicators],
-        value='Microcystin (ug/L)',
-        # className="eight columns",
-    ),
     dbc.Row(
         dcc.RadioItems(
             id="choose-2-scale-homepage",
             options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
                      {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
                      {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-            value='RAW')
+            value='RAW',
+            labelStyle={"display": "inline-block",
+                        "margin-bottom": "1rem",
+                        "margin-right": "2rem",
+                        "font-weight": "300"},
+        ), form=True, justify="center",
     ),
-    ], className="pretty_container")
+    dbc.Row([
+        dbc.Col([
+            html.H6("Choose an X variable:"),
+            dcc.Dropdown(
+        id='crossfilter-xaxis-column',
+        options=[{'label': i, 'value': i} for i in available_indicators],
+        value='Microcystin (ug/L)',
+            )], style={"text-align":"center"}, className="six columns"),
+
+        dbc.Col([
+            html.H6("Choose a Y variable:"),
+
+            dcc.Dropdown(
+            id='crossfilter-yaxis-column',
+            options=[{'label': i, 'value': i} for i in available_indicators],
+            value='Secchi Depth (m)',
+
+        )],  style={"text-align":"center"}, className="six columns")]),
+],  className="pretty_container graph")
+
+
+
 
 @app.callback(
     Output('crossfilter-indicator-scatter', 'figure'),
@@ -194,7 +213,7 @@ def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonifie
         yaxis=dict(
             title=yaxis_column_name,
     ),
-        hovermode='closest'
+        hovermode='closest',
     )
     allChoose2 = go.Figure(data=data, layout=layout)
     return allChoose2
@@ -209,7 +228,7 @@ Mapbox Plot -- Microcystin Concentration Geographically; all data (unfiltered)
 mapbox_access_token = 'pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w'
 
 layout = dict(
-    autosize=True,
+    #autosize=True,
     automargin=True,
     margin=dict(
         l=30,
@@ -225,6 +244,11 @@ layout = dict(
     mapbox=dict(
         accesstoken=mapbox_access_token,
         style="light",
+        center=dict(
+            lon=-30,
+            lat=37.772537
+        ),
+        zoom = 1.5,
         layers = [
         {
             "below": 'traces',
@@ -315,27 +339,36 @@ def update_output(jsonified_data):
     fig = dict(data=data, layout=layout)
     return fig
 
-mapPlot = html.Div([dcc.Graph(id="map_MCConc")], className="pretty_container")
+mapPlot = html.Div([dcc.Graph(id="map_MCConc")], className="pretty_container graph")
 
 
 
 overTimeAll= html.Div([
     dcc.Graph(id='over-time-indicator-scatter'),
-    dcc.Dropdown(
-            id='over-time-yaxis-column',
-            options=[{'label': i, 'value': i} for i in available_indicators],
-            value='Microcystin (ug/L)',
-            #className="eight columns",
-    ),
     dbc.Row(
         dcc.RadioItems(
             id="over-time-scale-homepage",
             options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
                      {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
                      {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-            value='RAW')
+            value='RAW',
+            labelStyle={"display": "inline-block",
+                        "margin-bottom": "1rem",
+                        "margin-right": "2rem",
+                        "font-weight": "300"},
+        ), form=True, justify="center",
     ),
-    ],className="pretty_container")
+    dbc.Row([
+        dbc.Col([
+            html.H6("Choose a Y variable:"),
+
+            dcc.Dropdown(
+                id='over-time-yaxis-column',
+                options=[{'label': i, 'value': i} for i in available_indicators],
+                value='Microcystin (ug/L)',
+
+            )], style={"text-align": "center"}, className="six columns")]),
+],className="pretty_container graph")
 
 
 
@@ -421,26 +454,63 @@ Total Phosphorus vs Total Nitrogen (filtered data)
 # The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
 # This definition is pulled in homepage.py to print the output on the homepage
 
-
-def filter_dataframe(df, lake_name, microcystin_types, year_slider):
+def filter_dataframe(df, lake_name, year_slider, month, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
     if type(lake_name) is not list:
         lake_name = [lake_name]
+
+    if type(substrate) is not list:
+        substrate = [substrate]
 
     if type(microcystin_types) is not list:
         microcystin_types = [microcystin_types]
 
-# If any filter options are empty, return an empty dataframe. This is necessary bc without it, it returns key errors or doesn't remove the very last thing user says to remove
-    if not microcystin_types:
-        dff= dfexampleSheet
+    if type(sample) is not list:
+        sample = [sample]
 
+    if type(field) is not list:
+        field = [field]
+
+    if type(filter) is not list:
+        filter = [filter]
+
+    if type(institution) is not list:
+        institution = [institution]
+
+    if type(peerRev) is not list:
+        peerRev = [peerRev]
+
+    if type(fieldRep) is not list:
+        fieldRep = [fieldRep]
+
+    if type(labRep) is not list:
+        labRep = [labRep]
+
+    if type(QA) is not list:
+        QA = [QA]
+
+# If any filter options are empty, return an empty dataframe. This is necessary bc without it, it returns key errors or doesn't remove the very last thing user says to remove
+    if not microcystin_types or not lake_name or not institution:
+        dff= dfcsvOutline
 
     else:
         yearRange = list(range(year_slider[0], year_slider[1] + 1, 1))
+        monthRange = list(range(month[0], month[1] + 1, 1))
 
-        dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)]
+
+        dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)
+                 & (dfMeta['Field_method'].isin(field))
+                 & (dfMeta['Field_method_YN'].isin(fieldRep))
+                 & (dfMeta['Substrate'].isin(substrate))
+                 & (dfMeta['Sample_Type'].isin(sample))
+                 & (dfMeta['Filter_YN'].isin(filter))
+                 & (dfMeta['Lab_method'].isin(labRep))
+                 & (dfMeta['Published'].isin(peerRev))
+                 & (dfMeta['QA_QC'].isin(QA))
+                 & (dfMeta['Institution'].isin(institution))
+        ]
 
         if dffMeta.empty:
-            dff = dfexampleSheet
+            dff = dfcsvOutline
         else:
 
             dffMeta = list(dffMeta.apply(set)[0])
@@ -448,21 +518,9 @@ def filter_dataframe(df, lake_name, microcystin_types, year_slider):
 
             dff = df[df['Body of Water Name'].isin(lake_name)
                      & (df['Year'].isin(yearRange))
+                     & (df['Month'].isin(monthRange))
                      & (df['RefID'].isin(dffMeta))
                      ]
-
-        """
-        
-        dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)
-                 & (dfMeta['Year'].isin(yearRange))
-                 & (dfMeta['RefID'].isin(dffMeta))
-                 ]
-        
-        """
-
-
-
-
 
     return dff
 
@@ -472,17 +530,27 @@ def filter_dataframe(df, lake_name, microcystin_types, year_slider):
 
 
 
-tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], className="pretty_container")
+tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], className="pretty_container graph")
 
 
 @app.callback(Output('tn_tp_filter_scatter', 'figure'),
               [Input('intermediate-value', 'children'),
                Input('lake_statuses', 'value'),
+               Input('filter-year-slider', 'value'),
+               Input('filter-month-slider', 'value'),
+               Input('substrate_types', 'value'),
                Input('microcystin_types', 'value'),
-               Input('filter-year-slider', 'value')],
-              )
-def make_filtered_TNTP_figure(jsonified_data, lake_statuses, microcystin_types, year_value):
-    current_df = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
+               Input('sample_types', 'value'),
+               Input('field_method_types', 'value'),
+               Input('filt_options', 'value'),
+               Input('institution_options', 'value'),
+               Input('pr_options', 'value'),
+               Input('fr_options', 'value'),
+               Input('lm_options', 'value'),
+               Input('qc_options', 'value')])
+def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
+    df = pullMasterdata()
+    current_df = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
 
 
     # Find MC concentration to compare to WHO/USEPA limits; filter into bins accordingly
@@ -545,7 +613,7 @@ def make_filtered_TNTP_figure(jsonified_data, lake_statuses, microcystin_types, 
               [Input('lake_statuses', 'value'),
                Input('year_slider', 'value')])
 def update_well_text(well_statuses, year_slider):
-
+    df = pullMasterdata()
     dff = filter_dataframe(df, well_statuses, year_slider)
     return dff['Body of Water Name'].nunique()
 
@@ -558,34 +626,53 @@ def update_well_text(well_statuses, year_slider):
 
 overTimeFiltered= html.Div([
     dcc.Graph(id='filtered-over-time-indicator-scatter'),
-    dcc.Dropdown(
-            id='filtered-over-time-yaxis-column',
-            options=[{'label': i, 'value': i} for i in available_indicators],
-            value='Microcystin (ug/L)',
-            #className="eight columns",
-    ),
     dbc.Row(
         dcc.RadioItems(
             id="over-time-scale",
             options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
                      {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
                      {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-            value='RAW')
+            value='RAW',
+            labelStyle={"display": "inline-block",
+                        "margin-bottom": "1rem",
+                        "margin-right": "2rem",
+                        "font-weight": "300"},
+        ), form=True, justify="center",
     ),
-    ],className="pretty_container")
+    dbc.Row([
+        dbc.Col([
+            html.H6("Choose a Y variable:"),
 
+            dcc.Dropdown(
+                id='filtered-over-time-yaxis-column',
+                options=[{'label': i, 'value': i} for i in available_indicators],
+                value='Microcystin (ug/L)',
+
+            )], style={"text-align": "center"}, className="six columns")]),
+], className="pretty_container graph")
 
 
 @app.callback(
     Output('filtered-over-time-indicator-scatter', 'figure'),
     [Input('over-time-scale', 'value'),
      Input('filtered-over-time-yaxis-column', 'value'),
-     Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
+     Input('lake_statuses', 'value'),
+     Input('filter-year-slider', 'value'),
+     Input('filter-month-slider', 'value'),
+     Input('substrate_types', 'value'),
      Input('microcystin_types', 'value'),
-     dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(selected_option, yaxis_column_name, lake_statuses, jsonified_data, microcystin_types, year_value):
-    dff = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
+     Input('sample_types', 'value'),
+     Input('field_method_types', 'value'),
+     Input('filt_options', 'value'),
+     Input('institution_options', 'value'),
+     Input('pr_options', 'value'),
+     Input('fr_options', 'value'),
+     Input('lm_options', 'value'),
+     Input('qc_options', 'value')])
+def update_graph(selected_option, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
+    df = pullMasterdata()
+    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -636,28 +723,39 @@ def update_graph(selected_option, yaxis_column_name, lake_statuses, jsonified_da
 
 choose2Filtered= html.Div([
     dcc.Graph(id='filtered-crossfilter-indicator-scatter'),
-    dcc.Dropdown(
-        id='filtered-crossfilter-yaxis-column',
-        options=[{'label': i, 'value': i} for i in available_indicators],
-        value='Secchi Depth (m)',
-        # className="eight columns",
-    ),
-    dcc.Dropdown(
-        id='filtered-crossfilter-xaxis-column',
-        options=[{'label': i, 'value': i} for i in available_indicators],
-        value='Microcystin (ug/L)',
-        # className="eight columns",
-    ),
     dbc.Row(
         dcc.RadioItems(
             id="choose-2-scale",
             options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
                      {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
                      {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-            value='RAW')
+            value='RAW',
+            labelStyle={"display": "inline-block",
+                        "margin-bottom": "1rem",
+                        "margin-right": "2rem",
+                        "font-weight": "300"},
+        ), form=True, justify="center",
     ),
-    ],className="pretty_container")
+    dbc.Row([
+        dbc.Col([
+            html.H6("Choose an X variable:"),
+            dcc.Dropdown(
+                id='filtered-crossfilter-xaxis-column',
+                options=[{'label': i, 'value': i} for i in available_indicators],
+                value='Microcystin (ug/L)',
+            )],  style={"text-align": "center"}, className="six columns"),
 
+        dbc.Col([
+            html.H6("Choose a Y variable:"),
+
+            dcc.Dropdown(
+                id='filtered-crossfilter-yaxis-column',
+                options=[{'label': i, 'value': i} for i in available_indicators],
+                value='Secchi Depth (m)',
+
+            )], style={"text-align": "center"}, className="six columns")]),
+
+], className="pretty_container graph")
 
 
 # Any Y over time filtered graph
@@ -666,12 +764,23 @@ choose2Filtered= html.Div([
     [Input('choose-2-scale', 'value'),
      Input('filtered-crossfilter-xaxis-column', 'value'),
      Input('filtered-crossfilter-yaxis-column', 'value'),
-     Input('lake_statuses', 'value'),
      Input('intermediate-value', 'children'),
+     Input('lake_statuses', 'value'),
+     Input('filter-year-slider', 'value'),
+     Input('filter-month-slider', 'value'),
+     Input('substrate_types', 'value'),
      Input('microcystin_types', 'value'),
-     dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_statuses, jsonified_data, microcystin_types, year_value):
-    dff = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
+     Input('sample_types', 'value'),
+     Input('field_method_types', 'value'),
+     Input('filt_options', 'value'),
+     Input('institution_options', 'value'),
+     Input('pr_options', 'value'),
+     Input('fr_options', 'value'),
+     Input('lm_options', 'value'),
+     Input('qc_options', 'value')])
+def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
+    df = pullMasterdata()
+    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -717,18 +826,27 @@ def update_graph(selected_option, xaxis_column_name, yaxis_column_name, lake_sta
 
 
 
-
 # Map plot filtered data
 
 @app.callback(
     Output('map_MCConc_Filtered', 'figure'),
-    [Input('lake_statuses', 'value'),
-     Input('intermediate-value', 'children'),
+    [Input('intermediate-value', 'children'),
+     Input('lake_statuses', 'value'),
+     Input('filter-year-slider', 'value'),
+     Input('filter-month-slider', 'value'),
+     Input('substrate_types', 'value'),
      Input('microcystin_types', 'value'),
-     dash.dependencies.Input('filter-year-slider', 'value')])
-def update_graph(lake_statuses, jsonified_data, microcystin_types , year_value):
-    selected_data = filter_dataframe(df, lake_statuses, microcystin_types, year_value)
-
+     Input('sample_types', 'value'),
+     Input('field_method_types', 'value'),
+     Input('filt_options', 'value'),
+     Input('institution_options', 'value'),
+     Input('pr_options', 'value'),
+     Input('fr_options', 'value'),
+     Input('lm_options', 'value'),
+     Input('qc_options', 'value')])
+def update_graph(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
+    df = pullMasterdata()
+    selected_data = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     data = []
     opacity_level = 0.8
     MC_conc = selected_data['Microcystin (ug/L)']
@@ -764,4 +882,4 @@ def update_graph(lake_statuses, jsonified_data, microcystin_types , year_value):
     return fig
 
 
-mapPlotFiltered = html.Div([dcc.Graph(id="map_MCConc_Filtered")], className="pretty_container")
+mapPlotFiltered = html.Div([dcc.Graph(id="map_MCConc_Filtered")], className="pretty_container graph")

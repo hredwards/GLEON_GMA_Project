@@ -28,38 +28,30 @@ def route_login():
 
 
 
-login_form = html.Div([
+login_form = dbc.Row([
     html.Form([
         dcc.Input(placeholder='username', name='username', type='text'),
         dcc.Input(placeholder='password', name='password', type='password'),
         html.Button('Login', type='submit')
     ], action='/login', method='post')
-])
+], justify="center", form=True,   className="twelve columns",
+)
 
 
 
-body = dbc.Container(
-    [
-       dbc.Row(html.H3("Welcome to the Login Page!")),
-        html.Div(id='custom-auth-frame'),
-        html.Div(id='custom-auth-frame-1',
-           style={
-                  'textAlign': 'right',
-                  "background": "black",
-           }
-           ),
-        login_form,
-        dbc.Button("Want a login?", href="/PageContact", color="secondary"),
-    ],
-    className="mt-4 pretty_container twelve columns",
+body = html.Div([
+    dbc.Row(html.H3("Welcome to the Login Page!"), justify="center", form=True, className="twelve columns"),
+    html.Div(id='custom-auth-frame'),
+    html.Div(id='custom-auth-frame-1', style={'textAlign': 'right', "background": "black"}),
+    login_form,
+    dbc.Row(dbc.Button("Want a login?", href="/PageContact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
+], className="pretty_container four columns offset-by-four columns",
 )
 
 
 
 
 def Login():
-    layout = html.Div([
-        body
-    ])
+    layout = body
     return layout
 

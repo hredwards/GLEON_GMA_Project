@@ -12,7 +12,7 @@ import base64
 import io
 from dash.dependencies import Input, Output, State
 from app import app
-from s3References import session, client, MasterData, dfMasterData, MetadataDB, dfMetadataDB, Bucket, UploadFolder, dfexampleSheet, AssetsFolder
+from s3References import session, client, MasterData, pullMasterdata, pullMetaDB, Bucket, UploadFolder, dfexampleSheet, AssetsFolder
 from botocore.exceptions import ClientError, NoCredentialsError
 import boto3
 import fuzzywuzzy
@@ -22,7 +22,13 @@ import dash_table
 import urllib.parse
 
 s3 = session.resource('s3')
-df= dfMasterData
+dfMasterData = pullMasterdata()
+dfMetadataDB = pullMetaDB()
+
+dfexampleSheet = dfexampleSheet.to_csv(index=False, encoding='utf-8')
+dfexampleSheet = "data:text/csv;charset=utf-8," + urllib.parse.quote(dfexampleSheet)
+
+
 
 login_form = html.Div([
     html.Form([
@@ -35,13 +41,20 @@ login_form = html.Div([
 class db_info:
     def __init__(self, db_name, uploaded_by, institution):
         current_date = datetime.datetime.now()
+        self.RefID = ''
         self.db_name = db_name
         self.uploaded_by = uploaded_by
         self.institution = institution
         self.upload_date = current_date.strftime("%Y\%m\%d")
         self.db_id = db_name.replace(" ", "_") + '_' + uploaded_by.replace(" ", "_") + '_' + current_date.strftime(
             "%Y\%m\%d")
-
+        self.db_publish_YN = ''
+        self.db_field_method_YN = ''
+        self.db_field_method = ''
+        self.db_lab_method = ''
+        self.db_qaqc = ''
+        self.db_fullqaqc = ''
+        self.db_filter = ''
         self.db_publication_url = ''
         self.db_field_method_url = ''
         self.db_lab_method_url = ''
@@ -49,7 +62,6 @@ class db_info:
         self.db_full_QCQC_url = ''
         self.db_substrate = ''
         self.db_sample_type = ''
-        self.db_field_method = ''
         self.db_microcystin_method = ''
         self.db_filter_size = ''
         self.db_cell_count_method = ''
@@ -69,216 +81,290 @@ Metadata
 """
 Upload Bar Layout and Callbacks
 """
-### Questions
-uploadBar = dbc.Container(
-                id="sidebar",
-                children=[
-                    Card(
-                        [
-#### Identifying - Name, Institution, Database Name
-                            dbc.Row([
-                                html.Form([
-                                    dcc.Input(placeholder='Name', id='uploader-Name', type='text'),
-                                    dcc.Input(placeholder='Institution', id='user-inst', type='text'),
-                                    dcc.Input(placeholder='Database Name', id='db-name', type='text'),
-                                ]),
-                            ]),
+## Step 1. Links to example csv
+exampleBar = dbc.Container([
+    html.H5('Step 3. Download the outline file below and copy the appropriate data into the csv file.', id="Instructions"),
+
+    dbc.Row(html.A("Download Datasheet Outline File", href=dfexampleSheet, target='blank', download='GLEON_GMA_OUTLINE.csv',
+           className="mr-1", style={'textAlign': 'center', "padding":"2rem .5rem 2rem .5rem"}), justify="center", form=True),
+])
+
+## Step 2. Spot to upload files
+dragUpload = dbc.Container([
+    html.H5('Step 4. Select or drag and drop the filled out csv file containing your data using the provided outline.', id="Instructions"),
+
+    dcc.Upload(
+        id="upload-data",
+        children=[
+            "Drag and Drop or ",
+            html.A(children="Select a File"),
+        ],
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+
+        accept=".csv, .xls, .xlsx",
+    ),
+    html.Div(id='upload-output'),
+],)
+
+## Step 3. Questions for Data Source Information
+uploadDataInfo = dbc.Container([
+    html.H5('Step 1. Fill out the Data Source questionnaire below with appropriate information and links as needed.',
+           id="Instructions"),
+
+    #### Identifying - Name, Institution, Database Name
+    dbc.Row([
+        html.Form([
+            dcc.Input(placeholder='Name', id='uploader-Name', type='text'),
+            dcc.Input(placeholder='Institution', id='user-inst', type='text'),
+            dcc.Input(placeholder='Database Name', id='db-name', type='text'),
+        ]),
+    ]),
+
+    #### Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name="Is the data peer reviewed or published?",
+            id="is-data-reviewed",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='URL Link',
+            type='text',
+            id='publication-url',
+            style={'display': 'none'}),
+    ]),
+
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name="Is the field method reported?",
+            id="is-field-method-reported",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='URL Link',
+            type='text',
+            id='field-method-report-url',
+            style={'display': 'none'}),
+    ]),
+
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name="Is the lab method reported?",
+            id="is-lab-method bui-reported",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='URL Link',
+            type='text',
+            id='lab-method-report-url',
+            style={'display': 'none'}),
+   ]),
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name='Is the QA/QC data available?',
+            id="is-qaqc-available",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='URL Link',
+            type='text',
+            id='qaqc-url',
+            style={'display': 'none'}
+        ),
+    ]),
+
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name = 'Is the full QA/QC data available upon request?',
+            id="is-full-qaqc-available",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='URL Link',
+            type='text',
+            id='full-qaqc-url',
+            style={'display': 'none'}
+        ),
+    ]),
+    # Cell Count
+    dbc.Row([
+        dbc.Row(html.P('Cell count method?')),
+        dbc.Row(
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='cell-count-url',
+                style={'display': 'inline-block', 'margin-left':'.5rem', 'text-align':'center'}
+
+            ),
+        ),
+    ]),
+
+    # Ancillary
+    dbc.Row([
+        dbc.Row(html.P('Ancillary data available?')),
+        dbc.Row(
+            dcc.Textarea(
+                placeholder='Description of parameters or URL link',
+                id='ancillary-data',
+                style={'display': 'inline-block', 'margin-left': '.5rem', 'text-align': 'center'}
+
+            ),
+        ),
+    ]),
+],)
 
 
-#### Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name="Is the data peer reviewed or published?",
-                                    id="is-data-reviewed",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='publication-url',
-                                    style={'display': 'none'}),
-                            ]),
+## Step 4. Questions for Methodology Information
+uploadMethodologies = dbc.Container([
+    html.H5('Step 2. Fill out the Methodology questionnaire below with appropriate information and links as needed.', id="Instructions"),
 
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name="Is the field method reported?",
-                                    id="is-field-method-reported",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='field-method-report-url',
-                                    style={'display': 'none'}),
-                            ]),
+    # Substrate
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+        name="Substrate",
+        id="substrate-option",
+        options=Substrate_Status_options,
+    )], className="uploadOption"),
 
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name="Is the lab method reported?",
-                                    id="is-lab-method bui-reported",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='lab-method-report-url',
-                                    style={'display': 'none'}),
-                           ]),
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name='Is the QA/QC data available?',
-                                    id="is-qaqc-available",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='qaqc-url',
-                                    style={'display': 'none'}
-                                ),
-                            ]),
+    # Sample Type
+    dbc.Row([HalsNamedInlineRadioItems(
+        name="Sample Types",
+        id="sample-type-option",
+        options=Sample_Types_options,
+    ),]),
 
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name = 'Is the full QA/QC data available upon request?',
-                                    id="is-full-qaqc-available",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='full-qaqc-url',
-                                    style={'display': 'none'}
-                                ),
+    # Field Method
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name="Field Method",
+            id="field-method-option",
+            options=Field_Methods_options
+        ),
+        dcc.Input(
+            placeholder='Depth Integrated (m)',
+            type='text',
+            id='vertically-depth-integrated',
+            style={'display': 'none'}
+        ),
+        dcc.Input(
+            placeholder='Depth Sampled (m)',
+            type='text',
+            id='discrete-depth-sampled',
+            style={'display': 'none'}
+        ),
+        dcc.Input(
+            placeholder='Depth of Sample (m)',
+            type='text',
+            id='spatially-integrated-depth',
+            style={'display': 'none'}
+        ),
+        dcc.Input(
+            placeholder='# of samples integrated',
+            type='text',
+            id='num-spatially-integrated-samples',
+            style={'display': 'none'}
+        ),
+    ]),
 
-                            ]),
+    #### Microcystin Method and filtering
+    dbc.Row([HalsNamedInlineRadioItems(
+        name="Microcystin Method",
+        id="microcystin-method",
+        options=Microcystin_Method_options,
+    ),]),
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name="Was Sample Filtered?",
+            id="sample-filtered",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='Filter Size (μm)',
+            type='text',
+            id='filter-size',
+            style={'display': 'none'}
+        ),
+    ]),
 
-### Methods
-                            # Substrate
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                name="Substrate",
-                                id="substrate-option",
-                                options=Substrate_Status_options,
-                            )], className="uploadOption"),
-
-                            # Sample Type
-                            dbc.Row([HalsNamedInlineRadioItems(
-                                name="Sample Types",
-                                id="sample-type-option",
-                                options=Sample_Types_options,
-                            ),]),
-
-                            # Field Method
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name="Field Method",
-                                    id="field-method-option",
-                                    options=Field_Methods_options
-                                ),
-                                dcc.Input(
-                                    placeholder='Depth Integrated (m)',
-                                    type='text',
-                                    id='vertically-depth-integrated',
-                                    style={'display': 'none'}
-                                ),
-                                dcc.Input(
-                                    placeholder='Depth Sampled (m)',
-                                    type='text',
-                                    id='discrete-depth-sampled',
-                                    style={'display': 'none'}
-                                ),
-                                dcc.Input(
-                                    placeholder='Depth of Sample (m)',
-                                    type='text',
-                                    id='spatially-integrated-depth',
-                                    style={'display': 'none'}
-                                ),
-                                dcc.Input(
-                                    placeholder='# of samples integrated',
-                                    type='text',
-                                    id='num-spatially-integrated-samples',
-                                    style={'display': 'none'}
-                                ),
-                            ]),
-
-#### Microcystin Method
-                            dbc.Row([HalsNamedInlineRadioItems(
-                                name="Microcystin Method",
-                                id="microcystin-method",
-                                options=Microcystin_Method_options,
-                            ),]),
-
-#### Filtered/Cell Count/ Ancillary
-                            # Filtered
-                            dbc.Row([
-                                HalsNamedInlineRadioItems(
-                                    name="Was Sample Filtered?",
-                                    id="sample-filtered",
-                                    options=data_Review_options,
-                                ),
-                                dcc.Input(
-                                    placeholder='Filter Size (μm)',
-                                    type='text',
-                                    id='filter-size',
-                                    style={'display': 'none'}
-                                ),
-                            ]),
-                            # Cell Count
-                            dbc.Row(html.P('Cell count method?')),
-                            dbc.Row(
-                                dcc.Input(
-                                    placeholder='URL Link',
-                                    type='text',
-                                    value='',
-                                    id='cell-count-url',
-                                ),
-                            ),
+],)
 
 
-                            # Ancillary
-                            dbc.Row(html.P('Ancillary data available?')),
-                            dbc.Row(
-                                dcc.Textarea(
-                                    id='ancillary-data',
-                                    placeholder='Description of parameters or URL link'
-                                ),
-                            ),
+## Step 5. Upload button and warning about using outline
+uploadButton = dbc.Container([
+    html.H5('Step 5.  Click \'Upload\' to ''upload your data and information to the project.', id="Instructions"),
 
-                        ]),
+    html.P('**Please note, the data must be in the same format as the outline file provided in step 3 above. Failure to use this '
+                'outline will likely return an error.**', style={'font-size': '1.5rem'}),
+
+    html.Button(id='upload-button', n_clicks=0, children='Upload',
+                style={'margin': '1rem .5rem .6rem .5rem', 'justify': 'center'}),
+
+    dbc.Row(html.P(id='upload-msg')),
+],)
 
 
-#### Upload Button
-                            dcc.Upload(
-                                id="upload-data",
-                                children=[
-                                    "Drag and Drop or ",
-                                    html.A(children="Select a File"),
-                                ],
-                                style={
-                                    'width': '100%',
-                                    'height': '60px',
-                                    'lineHeight': '60px',
-                                    'borderWidth': '1px',
-                                    'borderStyle': 'dashed',
-                                    'borderRadius': '5px',
-                                    'textAlign': 'center',
-                                    'margin': '10px'
-                                },
 
-                                accept=".csv, .xls, .xlsx",
-                            ),
-                            html.Div(id='upload-output'),
-                            html.Button(id='upload-button', n_clicks=0, children='Upload',
-                                        style={'margin': '1rem 0rem .6rem 0rem'}
-                                        ),
-                            dbc.Row(html.P(id='upload-msg')),
-                    ], className="page-content")
+## Combines all the questions/forms from above into one section, this is what's actually returned to the page
+uploadBar=html.Div([
+    dbc.Row([
+                dbc.Row(html.H5(
+                    "Thank you for your interest in contributing to our data collection! Please follow the 5 steps below to upload your file to our database.",
+                    style={'textAlign': 'center'}), justify="center", form=True),
+                dbc.Row(html.A("Contact us with any questions, problems, or concerns!", href="/PageContact",
+                           className="mr-1", style={'textAlign': 'center', "padding":"2rem .5rem 2rem .5rem"}), justify="center", form=True),
+
+    ], className="twelve columns"),
+
+
+    dbc.Row([
+        dbc.Col(exampleBar, className="pretty_container six columns"),
+        dbc.Col(dragUpload, className="pretty_container six columns"),
+    ], className="twelve columns"),
+
+
+    dbc.Row([
+        dbc.Col(uploadDataInfo, className="pretty_container six columns"),
+        dbc.Col(uploadMethodologies, className="pretty_container six columns"),
+    ], className="twelve columns"),
+
+    html.Div([
+        dbc.Col(uploadButton, className="pretty_container offset-by-two columns"),
+
+    ], className="eight columns"),
+
+], className="twelve columns")
+
+
+uploadBar=html.Div([
+    dbc.Col([
+                dbc.Row(html.H5(
+                    "Thank you for your interest in contributing to our data collection! Please follow the 5 steps below to upload your file to our database.",
+                    style={'textAlign': 'center'}), justify="center", form=True),
+                dbc.Row(html.A("Contact us with any questions, problems, or concerns!", href="/PageContact",
+                           className="mr-1", style={'textAlign': 'center', "padding":"2rem .5rem 2rem .5rem"}), justify="center", form=True),
+
+    ], className="twelve columns"),
+    dbc.Row(uploadDataInfo, className='pretty_container ten columns offset-by-one'),
+    dbc.Row(uploadMethodologies, className='pretty_container ten columns offset-by-one'),
+    dbc.Row([
+        dbc.Col(exampleBar, className="pretty_container five columns"),
+        dbc.Col(dragUpload, className="pretty_container five columns"),
+    ], className="ten columns offset-by-one"),
+    dbc.Row(uploadButton, className= 'pretty_container ten columns offset-by-one')
+], className="twelve columns")
+
+
+
 
 """
 Callbacks for inputs with URLs or Other Fields if "Yes"
@@ -289,7 +375,7 @@ Callbacks for inputs with URLs or Other Fields if "Yes"
     [Input('is-data-reviewed', 'value')]
 )
 def show_peer_review_url(is_peer_reviewed):
-    if is_peer_reviewed == 'is':
+    if is_peer_reviewed == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -300,7 +386,7 @@ def show_peer_review_url(is_peer_reviewed):
     [Input('is-field-method-reported', 'value')]
 )
 def show_field_method_url(is_fm_reported):
-    if is_fm_reported == 'is':
+    if is_fm_reported == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -311,7 +397,7 @@ def show_field_method_url(is_fm_reported):
     [Input('is-lab-method bui-reported', 'value')]
 )
 def show_lab_method_url(is_lm_reported):
-    if is_lm_reported == 'is':
+    if is_lm_reported == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -322,7 +408,7 @@ def show_lab_method_url(is_lm_reported):
     [Input('is-qaqc-available', 'value')]
 )
 def show_qaqc_url(is_qaqc_available):
-    if is_qaqc_available == 'is':
+    if is_qaqc_available == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -333,7 +419,7 @@ def show_qaqc_url(is_qaqc_available):
     [Input('is-full-qaqc-available', 'value')]
 )
 def show_full_qaqc_url(is_full_qaqc_available):
-    if is_full_qaqc_available == 'is':
+    if is_full_qaqc_available == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -343,7 +429,7 @@ def show_full_qaqc_url(is_full_qaqc_available):
     [dash.dependencies.Input('sample-filtered', 'value')]
 )
 def show_filter_size(visibility_state):
-    if visibility_state == 'is':
+    if visibility_state == 'Yes':
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -401,6 +487,8 @@ def update_metadata(new_dbinfo):
     """
     try:
         new_dbdf = pd.DataFrame({'DB_ID': [new_dbinfo.db_id],
+                                 'RefID': [new_dbinfo.RefID],
+                                 'Institution': [new_dbinfo.institution],
                                  'DB_name': [new_dbinfo.db_name],
                                  'Uploaded_by': [new_dbinfo.uploaded_by],
                                  'Upload_date': [new_dbinfo.upload_date],
@@ -408,18 +496,25 @@ def update_metadata(new_dbinfo):
                                  'Field_method_url': [new_dbinfo.db_field_method_url],  # url
                                  'Lab_method_url': [new_dbinfo.db_lab_method_url],  # url
                                  'QA_QC_url': [new_dbinfo.db_QAQC_url],  # url
-                                 'Full_QA_QC_url': [new_dbinfo.db_full_QCQC_url],  # url
+                                 'Full_QA_QC_url': [new_dbinfo.db_full_QAQC_url],  # url
                                  'Substrate': [new_dbinfo.db_substrate],
                                  'Sample_type': [new_dbinfo.db_sample_type],
-                                 'Field-method': [new_dbinfo.db_field_method],
+                                 'Field_method': [new_dbinfo.db_field_method],
                                  'Microcystin_method': [new_dbinfo.db_microcystin_method],
                                  'Filter_size': [new_dbinfo.db_filter_size],
                                  'Cell_count_method': [new_dbinfo.db_cell_count_method],
                                  'Ancillary_data': [new_dbinfo.db_ancillary_url],
                                  'N_lakes': [new_dbinfo.db_num_lakes],
-                                 'N_samples': [new_dbinfo.db_num_samples]})
+                                 'N_samples': [new_dbinfo.db_num_samples],
+                                 'Published': [new_dbinfo.db_publish_YN],
+                                 'Field_method_YN': [new_dbinfo.db_field_method_YN],
+                                 'Lab_method': [new_dbinfo.db_lab_method],
+                                 'QA_QC': [new_dbinfo.db_qaqc],
+                                 'QA_QC_Request': [new_dbinfo.db_fullqaqc],
+                                 'Filter_YN': [new_dbinfo.db_filter]})
 
         metadataDB = pd.concat([dfMetadataDB, new_dbdf], sort=False).reset_index(drop=True)
+        metadataDB =metadataDB.fillna("Not Reported")
         metadataDB.to_csv("MetadataDB.csv", encoding='utf-8', index=False)
         upload_to_aws("MetadataDB.csv", AssetsFolder)
     except Exception as e:
@@ -451,75 +546,34 @@ def upload_new_database(new_dbinfo, contents, filename):
         return 'There was an error processing this file.'
 
 
+
 def parse_new_database(new_dbinfo, new_df):
     """
         Convert CSV or Excel file data into Pickle file and store in the data directory
     """
+    global dfMasterData, dfMetadataDB
 
     try:
 
         # delete the extra composite section of the lake names - if they have any
-        new_df['LakeName'] = new_df['LakeName']. \
+        new_df['Body of Water Name'] = new_df['Body of Water Name']. \
             str.replace(r"[-]?.COMPOSITE(.*)", "", regex=True). \
             str.strip()
 
         new_df['Date'] = pd.to_datetime(new_df['Date']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        print(new_df['LakeName'])
+        new_df['RefID'] = new_dbinfo.RefID
+
+        print(new_df['Body of Water Name'])
+        """
         # convert mg to ug
         new_df['TP_mgL'] *= 1000
         new_df['TN_mgL'] *= 1000
+        
+        """
+
 
         # format all column names
-        new_df.rename(columns={'Date': 'DATETIME',
-                               'LakeName': 'Body of Water Name',
-                               'Lat': 'LAT',
-                               'Long': 'LONG',
-                               'Altitude_m': 'Altitude (m)',
-                               'MaximumDepth_m': 'Maximum Depth (m)',
-                               'MeanDepth_m': 'Mean Depth (m)',
-                               'SecchiDepth_m': 'Secchi Depth (m)',
-                               'SamplingDepth_m': 'Sampling Depth (m)',
-                               'ThermoclineDepth_m': 'Thermocline Depth (m)',
-                               'SurfaceTemperature_C': 'Surface Temperature (degrees celsius)',
-                               'EpilimneticTemperature_C': 'Epilimnetic Temperature (degrees celsius)',
-                               'TP_mgL': 'Total Phosphorus (ug/L)',
-                               'TN_mgL': 'Total Nitrogen (ug/L)',
-                               'NO3NO2_mgL': 'NO3 NO2 (mg/L)',
-                               'NH3_mgL': 'NH3 (mg/L)',
-                               'PO4_ugL': 'PO4 (ug/L)',
-                               'Chlorophylla_ugL': 'Total Chlorophyll a (ug/L)',
-                               'Chlorophyllb_ugL': 'Total Chlorophyll b (ug/L)',
-                               'Zeaxanthin_ugL': 'Zeaxanthin (ug/L)',
-                               'Diadinoxanthin_ugL': 'Diadinoxanthin (ug/L)',
-                               'Fucoxanthin_ugL': 'Fucoxanthin (ug/L)',
-                               'Diatoxanthin_ugL': 'Diatoxanthin (ug/L)',
-                               'Alloxanthin_ugL': 'Alloxanthin (ug/L)',
-                               'Peridinin_ugL': 'Peridinin (ug/L)',
-                               'Chlorophyllc2_ugL': 'Total Chlorophyll c2 (ug/L)',
-                               'Echinenone_ugL': 'Echinenone (ug/L)',
-                               'Lutein_ugL': 'Lutein (ug/L)',
-                               'Violaxanthin_ugL': 'Violaxanthin (ug/L)',
-                               'TotalMC_ug/L': 'Microcystin (ug/L)',
-                               'DissolvedMC_ugL': 'DissolvedMC (ug/L)',
-                               'MC_YR_ugL': 'Microcystin YR (ug/L)',
-                               'MC_dmRR_ugL': 'Microcystin dmRR (ug/L)',
-                               'MC_RR_ugL': 'Microcystin RR (ug/L)',
-                               'MC_dmLR_ugL': 'Microcystin dmLR (ug/L)',
-                               'MC_LR_ugL': 'Microcystin LR (ug/L)',
-                               'MC_LY_ugL': 'Microcystin LY (ug/L)',
-                               'MC_LW_ugL': 'Microcystin LW (ug/L)',
-                               'MC_LF_ugL': 'Microcystin LF (ug/L)',
-                               'NOD_ugL': 'Nodularin (ug/L)',
-                               'CYN_ugL': 'Cytotoxin Cylindrospermopsin (ug/L)',
-                               'ATX_ugL': 'Neurotoxin Anatoxin-a (ug/L)',
-                               'GEO_ugL': 'Geosmin (ug/L)',
-                               '2MIB_ngL': '2-MIB (ng/L)',
-                               'TotalPhyto_CellsmL': 'Phytoplankton (Cells/mL)',
-                               'Cyano_CellsmL': 'Cyanobacteria (Cells/mL)',
-                               'PercentCyano': 'Relative Cyanobacterial Abundance (percent)',
-                               'DominantBloomGenera': 'Dominant Bloom',
-                               'mcyD_genemL': 'mcyD gene (gene/mL)',
-                               'mcyE_genemL': 'mcyE gene (gene/mL)', },
+        new_df.rename(columns={'Date': 'DATETIME',},
                       inplace=True)
 
         # remove NaN columns
@@ -534,13 +588,19 @@ def parse_new_database(new_dbinfo, new_df):
         filename = str(csvdir)
         upload_to_aws(filename, UploadFolder)
         update_metadata(new_dbinfo)
+
+        masterDataDB = pd.concat([dfMasterData, new_df], sort=False).reset_index(drop=True)
+        masterDataDB.to_csv("MasterData.csv", encoding='utf-8', index=False)
+        upload_to_aws("MasterData.csv", AssetsFolder)
+
+        dfMasterData = pullMasterdata()
+        dfMetadataDB = pullMetaDB()
+
         return u'''Database "{}" has been successfully uploaded.'''.format(new_dbinfo.db_name)
 
     except Exception as e:
         print(e)
         return 'Error uploading database'
-
-
 
 
 
@@ -573,10 +633,17 @@ def update_uploaded_file(contents, filename):
      dash.dependencies.State('microcystin-method', 'value'),
      dash.dependencies.State('filter-size', 'value'),
      dash.dependencies.State('cell-count-url', 'value'),
-     dash.dependencies.State('ancillary-data', 'value')])
+     dash.dependencies.State('ancillary-data', 'value'),
+     dash.dependencies.State('is-data-reviewed', 'value'),
+     dash.dependencies.State('is-field-method-reported', 'value'),
+     dash.dependencies.State('is-qaqc-available', 'value'),
+     dash.dependencies.State('is-full-qaqc-available', 'value'),
+     dash.dependencies.State('sample-filtered', 'value'),
+     dash.dependencies.State('is-lab-method bui-reported', 'value'),
+     ])
 def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publicationURL, fieldMURL, labMURL, QAQCUrl,
                 fullQAQCUrl, substrate, sampleType, fieldMethod, microcystinMethod, filterSize, cellCountURL,
-                ancillaryURL):
+                ancillaryURL, publishYN, fMYN, qaqc, fullqaqc, filt, labMethod):
     if n_clicks != None and n_clicks > 0:
         if username == None or not username.strip():
             return 'Name field cannot be empty.'
@@ -588,6 +655,7 @@ def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publi
             return 'Please select a file.'
         else:
             new_db = db_info(dbname, username, userinst)
+            new_db.institution = userinst
             new_db.db_publication_url = publicationURL
             new_db.db_field_method_url = fieldMURL
             new_db.db_lab_method_url = labMURL
@@ -600,7 +668,14 @@ def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publi
             new_db.db_filter_size = filterSize
             new_db.db_cell_count_method = cellCountURL
             new_db.db_ancillary_url = ancillaryURL
-
+            new_db.RefID = dfMetadataDB['RefID'].max()+1
+            new_db.db_publish_YN = publishYN
+            new_db.db_field_method_YN = fMYN
+            new_db.db_field_method = fieldMethod
+            new_db.db_qaqc = qaqc
+            new_db.db_fullqaqc = fullqaqc
+            new_db.db_filter = filt
+            new_db.db_lab_method = labMethod
             return upload_new_database(new_db, contents, filename)
 
 
@@ -636,15 +711,15 @@ def get_metadata_table_content(current_metadata):
 
 
 
-dataPageTable = html.Div([
+dataPageTable = dbc.Container([
 dash_table.DataTable(
         id='metadata_table',
         columns=[
             # the column names are seen in the UI but the id should be the same as dataframe col name
             # the DB ID column is hidden - later used to find DB pkl files in the filtering process
             # TODO: add column for field method in table
-            {'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
-            {'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
+            #{'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
+            #{'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
             {'name': 'Database Name', 'id': 'DB_name'},
             {'name': 'Uploaded By', 'id': 'Uploaded_by'},
             {'name': 'Upload Date', 'id': 'Upload_date'},
@@ -665,16 +740,16 @@ dash_table.DataTable(
     ),
 
     # Export the selected datasets in a single csv file
-    html.A(html.Button(id='export-data-button', children='Download Selected Data',
+    dbc.Row(html.A(html.Button(id='export-data-button', children='Download Selected Data',
                        style={
-                           'margin': '10px 0px 10px 10px'
+                           'margin': '1rem 0px 1rem 1rem'
                        }),
            href='',
            id='download-link',
            download='data.csv',
            target='_blank'
-           ),
-])
+           ),justify="center", form=True)
+], style={"max-width":"90%"},)
 
 
 
@@ -696,7 +771,7 @@ def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
             # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
             for row in selected_rows:
                 rowid = row["RefID"]
-                db_data = df[df['RefID']==rowid]
+                db_data = dfMasterData[dfMasterData['RefID']==rowid]
                 new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
             dff= new_dataframe
             csv_string = dff.to_csv(index=False, encoding='utf-8')
@@ -714,4 +789,3 @@ def download_s3_file(filename):
     s3File = client.get_object(Bucket='gleongmabucket', Key=key)
     dfS3File = pd.read_csv(io.BytesIO(s3File['Body'].read()))
     return dfS3File
-

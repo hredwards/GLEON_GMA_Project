@@ -1,3 +1,34 @@
+html {
+  font-size: 62.5%; }
+body {
+  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: rgb(50, 50, 50);
+  background-color: #F0F0F0;
+  margin: 5%;
+}
+.pretty_container {
+  border-radius: 5px;
+  background-color: rgba(249, 249, 249, .85);
+  margin: 1rem;
+  padding: 1rem;
+  position: relative;
+  box-shadow: 2px 2px 2px lightgrey;
+}
+
+
+
+label,
+legend {
+  display: block;
+  margin-bottom: 0px; }
+
+
+
+
+
 background-color:#92a8d1;
 
 .body {
@@ -69,14 +100,11 @@ display: flex;
 min-height:80px;
 max-width:100%;
 margin: 1% 0% 1% 0%;
-padding: .5rem 1rem;;
+padding: .5rem!important;
 }
 
 #NavBarheading{
-  align-items: center;
-  text-align: center;
-  float:right;
-  right:-50%;
+padding: 2rem .5rem 2rem .5rem;
 }
 
 .navbar img{
@@ -107,7 +135,7 @@ a.active.nav-link{background-color:rgb(0, 153, 51)!important;}
 }
 .col {
   flex: 1;
-  padding: 16px;
+  padding: .5rem;
 }
 
 @media only screen and (max-width: 1310px){
@@ -182,3 +210,42 @@ width:100%;
 height:auto;
 align:left;
 }
+
+.graph {
+height:100%;
+}
+
+#map_MCConc.dash-graph {
+height:60rem;
+}
+
+#tn_tp_scatter.dash-graph {
+height:60rem;
+}
+
+#map_MCConc_Filtered.dash-graph {
+height:60rem;
+}
+
+#tn_tp_filter_scatter.dash-graph {
+height:60rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+#over-time-indicator-scatter
+#filtered-over-time-indicator-scatter
+#filtered-crossfilter-indicator-scatter
+#crossfilter-indicator-scatter
+*/

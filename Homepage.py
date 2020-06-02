@@ -9,21 +9,26 @@ app.config['suppress_callback_exceptions'] = True
 
 body = html.Div(
     [
-        dbc.Col([dbc.Row(html.H3("Welcome to the Global Microcystin Aggregation Project!", style={'textAlign':'center', 'float':'left'}),),
-        dbc.Row(html.P(
-                    """This is the homepage, this would have graphs and stuff; realistically
-                    long term this needs to become Oldapp.py but for now we'll use this for testing"""),),
-        dbc.Row(dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg"),),], className="pretty_container"),
+        dbc.Col([
+            dbc.Row(html.H3("Welcome to the Global Microcystin Aggregation Project!"), justify="center", form=True),
+
+            dbc.Row(html.P("Below are some interactive graphs visualizing all the data that has been uploaded so far. Visit "
+                       " the \'Filter Graphs\' page to apply filters to the dataset. Data can be downloaded from the \'Data\' page. Please login "
+                       "to upload data. If you would like to learn more, please visit our About page or contact us via information on the Contact page.", style={"padding":"1rem", "margin":"1rem"}), justify="center", form=True),
+            dbc.Row(dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg"), justify="center", form=True),], className="pretty_container twelve columns"),
         html.Div(
             [
-                dbc.Col([mapPlot, tn_tp_scatter_all], className="six columns"),
-                dbc.Col([overTimeAll, choose2All], className="five columns"),
+                dbc.Col([mapPlot], className="six columns"),
+                dbc.Col([tn_tp_scatter_all], className="six columns"),
+            ], className="twelve columns"),
+        html.Div(
+            [
+                dbc.Col([choose2All], className="six columns"),
+                dbc.Col([overTimeAll], className="six columns"),
             ], className="twelve columns"),
         html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(dfMasterData)),
     ], className="twelve columns"
 )
-
-
 
 
 def Homepage():

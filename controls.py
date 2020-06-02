@@ -3,7 +3,7 @@ This will have the data dictionaries for any filters we may use on the app.
 """""
 
 from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
-from LakeIDGenerator import lakeNames
+from LakeIDGenerator import lakeNames, instNames
 
 masterFile = "data/MasterData.csv"
 
@@ -45,6 +45,8 @@ month_Controls = dict(
 
 LAKES=lakeNames
 
+INSTITUTIONS = instNames
+
 COUNTRIES = dict(
     USA = "USA",
     EU = "Europe",
@@ -65,23 +67,26 @@ COUNTRIES = dict(
 
 ## Methods
 Substrate_Status = {
-    'PL' : 'Planktronic',
-    'BE' : 'Beach',
-    'PE' : 'Periphyton'
+    'Planktronic' : 'Planktronic',
+    'Beach' : 'Beach',
+    'Periphyton' : 'Periphyton',
+    'Not Reported': 'Not Reported'
 }
 
 
-Sample_Types = dict(
-    RM = 'Routine Monitoring',
-    RWC = 'Reactionary Water Column',
-    SF = 'Scum Focused',
-)
+Sample_Types = {
+    'Routine Monitoring' : 'Routine Monitoring',
+    'Reactionary Water Column' : 'Reactionary Water Column',
+    'Scum Focused' : 'Scum Focused',
+    'Not Reported': 'Not Reported'
+}
 
-Field_Methods = dict(
-    VIS = 'Vertically Integrated Sample',
-    DDS = 'Discrete Depth Sample',
-    SIS = 'Spatially Integrated Sample',
-)
+Field_Methods = {
+    'Vertically Integrated Sample' : 'Vertically Integrated Sample',
+    'Discrete Depth Sample' : 'Discrete Depth Sample',
+    'Spatially Integrated Sample' : 'Spatially Integrated Sample',
+    'Not Reported' : 'Not Reported'
+}
 
 Microcystin_Method = {
     'PPIA' : 'PPIA',
@@ -93,10 +98,17 @@ Microcystin_Method = {
 ## Data
 
 data_Review = {
-    'is' : 'Yes',
-    'not' : 'No',
+    'Yes' : 'Yes',
+    'No' : 'No',
 }
 
+
+
+ynLabels = {
+    'Yes': 'Yes',
+    'No': 'No',
+    'Not Reported' : 'Not Reported'
+}
 
 
 ### Options
@@ -128,3 +140,10 @@ lake_status_options = [{'label': str(LAKES[lake_info]),
 data_Review_options = [{'label': str(data_Review[yn]),
                       'value': str(yn)}
                      for yn in data_Review]
+
+institution_status_options = [{'label': str(INSTITUTIONS[inst_info]),
+                      'value': str(inst_info)}
+                     for inst_info in INSTITUTIONS]
+
+ynOptions = [{'label': str(ynLabels[ynVal]), 'value': str(ynVal)}
+                  for ynVal in ynLabels]

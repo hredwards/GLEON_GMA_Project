@@ -6,12 +6,10 @@ from uploadDownload import uploadBar
 
 
 
-body = dbc.Row(html.H3("Welcome to the Upload Page!", id="heading"), className="pageTitle")
 
 
 def Upload():
     layout = html.Div([
-        body,
         uploadBar
     ], className="page-content")
     return layout
