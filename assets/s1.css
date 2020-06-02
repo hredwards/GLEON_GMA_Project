@@ -107,7 +107,7 @@
 /* For devices larger than 786px */
 @media (min-width: 786px) {
   .container {
-    width: 90%; }
+    width: 95%; }
   .column,
   /*.columns {
     margin-left: 0.5%; }
@@ -175,7 +175,7 @@
 /* For devices larger than 1200 */
 @media (min-width: 1200px) {
   .container {
-    width: 100%;
+    width: 95%;
     height:100%;}
   .column,
   /*.columns {

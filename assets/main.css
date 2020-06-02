@@ -12,7 +12,7 @@ body {
 .pretty_container {
   border-radius: 5px;
   background-color: rgba(249, 249, 249, .85);
-  margin: 1rem;
+  margin: .5rem;
   padding: 1rem;
   position: relative;
   box-shadow: 2px 2px 2px lightgrey;
@@ -224,11 +224,11 @@ height:60rem;
 }
 
 #map_MCConc_Filtered.dash-graph {
-height:60rem;
+height:55rem;
 }
 
 #tn_tp_filter_scatter.dash-graph {
-height:60rem;
+height:55rem;
 }
 
 

@@ -549,7 +549,6 @@ tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], classNam
                Input('lm_options', 'value'),
                Input('qc_options', 'value')])
 def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    df = pullMasterdata()
     current_df = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
 
 
@@ -613,7 +612,6 @@ def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value, month_v
               [Input('lake_statuses', 'value'),
                Input('year_slider', 'value')])
 def update_well_text(well_statuses, year_slider):
-    df = pullMasterdata()
     dff = filter_dataframe(df, well_statuses, year_slider)
     return dff['Body of Water Name'].nunique()
 
@@ -671,7 +669,6 @@ overTimeFiltered= html.Div([
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
 def update_graph(selected_option, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    df = pullMasterdata()
     dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
@@ -779,7 +776,6 @@ choose2Filtered= html.Div([
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
 def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    df = pullMasterdata()
     dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
@@ -845,7 +841,6 @@ def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonifie
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
 def update_graph(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    df = pullMasterdata()
     selected_data = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
     data = []
     opacity_level = 0.8

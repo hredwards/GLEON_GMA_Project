@@ -49,7 +49,7 @@ dateFilters = html.Div([
                 className="dcc_control"
             ),
         ])
-    ])
+    ], open=True)
 
 ])
 
@@ -184,7 +184,7 @@ methodFilters = html.Div([
                 style={'display': 'none'}
             ),
         ])
-    ])
+    ], open=True)
 
 ])
 
@@ -320,7 +320,7 @@ dataSourceFilters = html.Div([
                 style={'display': 'none'}
             ),
         ])
-    ])
+    ], open=True)
 
 ])
 
@@ -354,12 +354,12 @@ lake_filter = html.Div([
 
 filtersAvailable = html.Div(
                     [
-                        dbc.Row(html.H5("Just select your filters below, and all graphs will update with the appropriate datasets."), justify="center", form=True),
+                        dbc.Row(html.H6("Just select your filters below, and all graphs will update with the appropriate datasets."), justify="center", form=True, style={"text-align":"center"}),
                         lake_filter,
                         dateFilters,
                         methodFilters,
                         dataSourceFilters,
-                    ], className="pretty_container"
+                    ], style={"margin":"1rem", "padding":"1rem"}, className="pretty_container"
                 )
 @app.callback(
     Output('lake_statuses', 'style'),
@@ -657,15 +657,21 @@ body = html.Div(
         #summaryboxes,
         html.Div(
             [
-                dbc.Col([filtersAvailable], className="four columns"),
-                dbc.Col([mapPlotFiltered], className="eight columns"),
+                dbc.Col([filtersAvailable], className="three columns"),
+                dbc.Col([mapPlotFiltered], className="five columns"),
                 dbc.Col([tn_tp_scatter_filter], className="four columns"),
+                dbc.Col([overTimeFiltered], className="five columns"),
                 dbc.Col([choose2Filtered], className="four columns"),
-                dbc.Col([overTimeFiltered], className="four columns"),
+
             ], className="twelve columns"),
 
         html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(df)),
-    ], className="twelve columns",
+    ], id="mainContainer",
+    style={
+        "display": "flex",
+        "flex-direction": "column"
+    },
+    className="twelve columns",
 )
 
 
