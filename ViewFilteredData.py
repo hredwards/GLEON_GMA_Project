@@ -659,9 +659,6 @@ body = html.Div(
             [
                 dbc.Col([filtersAvailable], className="four columns"),
                 dbc.Col([mapPlotFiltered], className="eight columns"),
-            ], className="twelve columns"),
-        html.Div(
-            [
                 dbc.Col([tn_tp_scatter_filter], className="four columns"),
                 dbc.Col([choose2Filtered], className="four columns"),
                 dbc.Col([overTimeFiltered], className="four columns"),
