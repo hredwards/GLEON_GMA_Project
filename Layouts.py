@@ -12,7 +12,7 @@ from freshGraphs import tn_tp_scatter_all, tn_tp_scatter_filter, choose2All, cho
 from ViewFilteredData import filtersAvailable, FilteredView
 from Homepage import Homepage
 
-app.config['suppress_callback_exceptions'] = True
+app.config['suppress_callback_exceptions'] = False
 
 s3 = session.resource('s3')
 dfMasterData = pullMasterdata()
