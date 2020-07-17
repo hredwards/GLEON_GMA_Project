@@ -23,6 +23,8 @@ import urllib.parse
 from Crypto.Cipher import AES
 import random
 import string
+app.config['suppress_callback_exceptions'] = True
+
 
 s3 = session.resource('s3')
 dfMasterData = pullMasterdata()

@@ -19,3 +19,4 @@ app.layout = html.Div([
     html.Div(id = 'page-content')
 ],
 )
+app.config['suppress_callback_exceptions'] = True

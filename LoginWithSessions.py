@@ -15,6 +15,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from Layouts import Upload
 from navbar import NavBar
+app.config['suppress_callback_exceptions'] = True
 
 
 class User:
