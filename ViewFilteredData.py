@@ -13,7 +13,7 @@ from controls import LAKES, lake_status_options, Substrate_Status, Substrate_Sta
 #from NewGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlotFiltered, convert_to_json, overTimeFiltered
 
 
-app.config['suppress_callback_exceptions'] = False
+app.config['suppress_callback_exceptions'] = True
 df = pullMasterdata()
 
 dateFilters = html.Div([
