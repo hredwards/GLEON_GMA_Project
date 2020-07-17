@@ -10,7 +10,7 @@ import os
 external_stylesheets = ['/assets/main.css']
 app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
 server = app.server
-app.server.secret_key = os.environ("Flask_SK")
+app.server.secret_key = os.getenv("Flask_SK")
 app.title = "GLEON GMA Project"
 
 app.layout = html.Div([
