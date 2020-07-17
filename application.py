@@ -32,6 +32,7 @@ from Upload import Upload
 """
 
 app.config['suppress_callback_exceptions'] = True
+server = app.server
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
