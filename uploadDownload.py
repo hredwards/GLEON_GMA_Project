@@ -20,6 +20,9 @@ from controls import month_Controls, Substrate_Status_options, Sample_Types_opti
 from dash_reusable_components import Card, NamedSlider, NamedInlineRadioItems, HalsNamedInlineRadioItems
 import dash_table
 import urllib.parse
+from Crypto.Cipher import AES
+import random
+import string
 
 s3 = session.resource('s3')
 dfMasterData = pullMasterdata()
@@ -42,6 +45,7 @@ class db_info:
     def __init__(self, db_name, uploaded_by, institution):
         current_date = datetime.datetime.now()
         self.RefID = ''
+        self.PWYN = ''
         self.db_name = db_name
         self.uploaded_by = uploaded_by
         self.institution = institution
@@ -66,6 +70,8 @@ class db_info:
         self.db_filter_size = ''
         self.db_cell_count_method = ''
         self.db_ancillary_url = ''
+        self.PWT = ''
+        self.key = ''
         self.db_num_lakes = 0
         self.db_num_samples = 0
 
@@ -89,7 +95,7 @@ exampleBar = dbc.Container([
            className="mr-1", style={'textAlign': 'center', "padding":"2rem .5rem 2rem .5rem"}), justify="center", form=True),
 ])
 
-## Step 2. Spot to upload files
+## Step 4. Spot to upload files
 dragUpload = dbc.Container([
     html.H5('Step 4. Select or drag and drop the filled out csv file containing your data using the provided outline.', id="Instructions"),
 
@@ -112,10 +118,25 @@ dragUpload = dbc.Container([
 
         accept=".csv, .xls, .xlsx",
     ),
+
+    dbc.Row([
+        HalsNamedInlineRadioItems(
+            name='Would you like to password protect this file? If so, users will not be able to download it from the data page.',
+            id="pw-protect",
+            options=data_Review_options,
+        ),
+        dcc.Input(
+            placeholder='Password',
+            type='password',
+            id='pw-protect-txt',
+            style={'display': 'none'}
+        ),
+    ]),
+
     html.Div(id='upload-output'),
 ],)
 
-## Step 3. Questions for Data Source Information
+## Step 1. Questions for Data Source Information
 uploadDataInfo = dbc.Container([
     html.H5('Step 1. Fill out the Data Source questionnaire below with appropriate information and links as needed.',
            id="Instructions"),
@@ -224,7 +245,7 @@ uploadDataInfo = dbc.Container([
 ],)
 
 
-## Step 4. Questions for Methodology Information
+## Step 2. Questions for Methodology Information
 uploadMethodologies = dbc.Container([
     html.H5('Step 2. Fill out the Methodology questionnaire below with appropriate information and links as needed.', id="Instructions"),
 
@@ -371,6 +392,17 @@ Callbacks for inputs with URLs or Other Fields if "Yes"
 """
 # Controls if text fields are visible based on selected options in upload questionnaire
 @app.callback(
+    Output('pw-protect-txt', 'style'),
+    [Input('pw-protect', 'value')]
+)
+def show_peer_review_url(is_peer_reviewed):
+    if is_peer_reviewed == 'Yes':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
     Output('publication-url', 'style'),
     [Input('is-data-reviewed', 'value')]
 )
@@ -488,6 +520,9 @@ def update_metadata(new_dbinfo):
     try:
         new_dbdf = pd.DataFrame({'DB_ID': [new_dbinfo.db_id],
                                  'RefID': [new_dbinfo.RefID],
+                                 'PWYN': [new_dbinfo.PWYN],
+                                 'PWT': [new_dbinfo.PWT],
+                                 'key': [new_dbinfo.key],
                                  'Institution': [new_dbinfo.institution],
                                  'DB_name': [new_dbinfo.db_name],
                                  'Uploaded_by': [new_dbinfo.uploaded_by],
@@ -551,10 +586,7 @@ def parse_new_database(new_dbinfo, new_df):
     """
         Convert CSV or Excel file data into Pickle file and store in the data directory
     """
-    global dfMasterData, dfMetadataDB
-
     try:
-
         # delete the extra composite section of the lake names - if they have any
         new_df['Body of Water Name'] = new_df['Body of Water Name']. \
             str.replace(r"[-]?.COMPOSITE(.*)", "", regex=True). \
@@ -592,9 +624,6 @@ def parse_new_database(new_dbinfo, new_df):
         masterDataDB = pd.concat([dfMasterData, new_df], sort=False).reset_index(drop=True)
         masterDataDB.to_csv("MasterData.csv", encoding='utf-8', index=False)
         upload_to_aws("MasterData.csv", AssetsFolder)
-
-        dfMasterData = pullMasterdata()
-        dfMetadataDB = pullMetaDB()
 
         return u'''Database "{}" has been successfully uploaded.'''.format(new_dbinfo.db_name)
 
@@ -640,10 +669,13 @@ def update_uploaded_file(contents, filename):
      dash.dependencies.State('is-full-qaqc-available', 'value'),
      dash.dependencies.State('sample-filtered', 'value'),
      dash.dependencies.State('is-lab-method bui-reported', 'value'),
+     dash.dependencies.State('pw-protect', 'value'),
+     dash.dependencies.State('pw-protect-txt', 'value'),
+
      ])
 def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publicationURL, fieldMURL, labMURL, QAQCUrl,
                 fullQAQCUrl, substrate, sampleType, fieldMethod, microcystinMethod, filterSize, cellCountURL,
-                ancillaryURL, publishYN, fMYN, qaqc, fullqaqc, filt, labMethod):
+                ancillaryURL, publishYN, fMYN, qaqc, fullqaqc, filt, labMethod, pwyn, pwt):
     if n_clicks != None and n_clicks > 0:
         if username == None or not username.strip():
             return 'Name field cannot be empty.'
@@ -676,6 +708,18 @@ def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publi
             new_db.db_fullqaqc = fullqaqc
             new_db.db_filter = filt
             new_db.db_lab_method = labMethod
+            new_db.PWYN = pwyn
+
+            if pwyn == "Yes":
+                key = ''.join(random.choice(string.ascii_letters + string.digits) for i in range(16))
+                obj = AES.new(key, AES.MODE_CFB, 'This is an IV456')
+                pwencrypt = obj.encrypt(pwt)
+                new_db.PWT = pwencrypt
+                new_db.key = key
+
+            elif pwyn != "Yes":
+                new_db.PWT=""
+
             return upload_new_database(new_db, contents, filename)
 
 
@@ -685,71 +729,13 @@ def upload_file(n_clicks, contents, filename, dbname, username, userinst,  publi
 Download Bar
 """
 
-## Download Layout
+## Download Layout -- moved to layouts.py
 
 refreshButton = html.Button(id='refresh-db-button', children='Refresh',
             style={
                 'margin': '10px 0px 10px 0px'
             }
             ),
-
-
-
-def get_metadata_table_content(current_metadata):
-    '''
-        returns the data for the specified columns of the metadata data table
-    '''
-
-    table_df = current_metadata[
-        ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Microcystin_method', 'N_lakes', 'N_samples']]
-    return table_df.to_dict("rows")
-
-
-
-
-
-
-
-
-dataPageTable = dbc.Container([
-dash_table.DataTable(
-        id='metadata_table',
-        columns=[
-            # the column names are seen in the UI but the id should be the same as dataframe col name
-            # the DB ID column is hidden - later used to find DB pkl files in the filtering process
-            # TODO: add column for field method in table
-            #{'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
-            #{'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
-            {'name': 'Database Name', 'id': 'DB_name'},
-            {'name': 'Uploaded By', 'id': 'Uploaded_by'},
-            {'name': 'Upload Date', 'id': 'Upload_date'},
-            {'name': 'Microcystin Method', 'id': 'Microcystin_method'},
-            {'name': 'Number of Lakes', 'id': 'N_lakes'},
-            {'name': 'Number of Samples', 'id': 'N_samples'}, ],
-        data=get_metadata_table_content(dfMetadataDB),
-        row_selectable='multi',
-        selected_rows=[],
-        style_as_list_view=True,
-        # sorting=True,
-        #style_table={'overflowX': 'scroll'},
-        style_cell={'textAlign': 'left'},
-        style_header={
-            'backgroundColor': 'white',
-            'fontWeight': 'bold'
-        },
-    ),
-
-    # Export the selected datasets in a single csv file
-    dbc.Row(html.A(html.Button(id='export-data-button', children='Download Selected Data',
-                       style={
-                           'margin': '1rem 0px 1rem 1rem'
-                       }),
-           href='',
-           id='download-link',
-           download='data.csv',
-           target='_blank'
-           ),justify="center", form=True)
-], style={"max-width":"90%"},)
 
 
 

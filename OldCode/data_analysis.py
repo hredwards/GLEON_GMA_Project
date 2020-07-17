@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 import re
-from settings import months, USEPA_LIMIT, WHO_LIMIT
+from OldCode.settings import USEPA_LIMIT, WHO_LIMIT
 
 
 def geo_log_plot(selected_data, current_df):

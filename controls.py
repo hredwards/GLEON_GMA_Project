@@ -70,7 +70,7 @@ Substrate_Status = {
     'Planktronic' : 'Planktronic',
     'Beach' : 'Beach',
     'Periphyton' : 'Periphyton',
-    'Not Reported': 'Not Reported'
+    'Not Reported': 'Not Reported',
 }
 
 
@@ -78,20 +78,21 @@ Sample_Types = {
     'Routine Monitoring' : 'Routine Monitoring',
     'Reactionary Water Column' : 'Reactionary Water Column',
     'Scum Focused' : 'Scum Focused',
-    'Not Reported': 'Not Reported'
+    'Not Reported': 'Not Reported',
 }
 
 Field_Methods = {
     'Vertically Integrated Sample' : 'Vertically Integrated Sample',
     'Discrete Depth Sample' : 'Discrete Depth Sample',
     'Spatially Integrated Sample' : 'Spatially Integrated Sample',
-    'Not Reported' : 'Not Reported'
+    'Not Reported' : 'Not Reported',
 }
 
 Microcystin_Method = {
     'PPIA' : 'PPIA',
     'ELISA' : 'ELISA',
-    'LC-MSMS' : 'LC-MSMS'
+    'LC-MSMS' : 'LC-MSMS',
+    'Not Reported': 'Not Reported',
 }
 
 
@@ -100,6 +101,7 @@ Microcystin_Method = {
 data_Review = {
     'Yes' : 'Yes',
     'No' : 'No',
+    'Not Reported': 'Not Reported',
 }
 
 
@@ -107,7 +109,7 @@ data_Review = {
 ynLabels = {
     'Yes': 'Yes',
     'No': 'No',
-    'Not Reported' : 'Not Reported'
+    'Not Reported' : 'Not Reported',
 }
 
 

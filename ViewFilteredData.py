@@ -3,16 +3,17 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 #from tempgraphs import tnTPPlotAll
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from app import app
-import data_analysis as da
 from freshGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlotFiltered, convert_to_json, overTimeFiltered
-from s3References import pullMasterdata, dfcsvOutline
-from controls import month_Controls, LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, \
-    Sample_Types_options, Sample_Types, Field_Methods_options, Microcystin_Method, Microcystin_Method_options, data_Review_options,\
-    Field_Methods, data_Review, institution_status_options, INSTITUTIONS, ynOptions, ynLabels
+from s3References import pullMasterdata
+from controls import LAKES, lake_status_options, Substrate_Status, Substrate_Status_options, \
+    Sample_Types_options, Sample_Types, Field_Methods_options, Microcystin_Method, Microcystin_Method_options, \
+    Field_Methods, institution_status_options, INSTITUTIONS, ynOptions, ynLabels
+#from NewGraphs import tn_tp_scatter_filter, choose2Filtered, mapPlotFiltered, convert_to_json, overTimeFiltered
 
-app.config['suppress_callback_exceptions'] = True
+
+app.config['suppress_callback_exceptions'] = False
 df = pullMasterdata()
 
 dateFilters = html.Div([
@@ -65,10 +66,10 @@ methodFilters = html.Div([
             dcc.RadioItems(
                 id='substrate_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -91,10 +92,10 @@ methodFilters = html.Div([
             dcc.RadioItems(
                 id='microcystin_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -117,10 +118,10 @@ methodFilters = html.Div([
             dcc.RadioItems(
                 id='sample_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -142,10 +143,10 @@ methodFilters = html.Div([
             dcc.RadioItems(
                 id='field_method_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -166,10 +167,10 @@ methodFilters = html.Div([
             dcc.RadioItems(
                 id='filtered_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -199,10 +200,10 @@ dataSourceFilters = html.Div([
             dcc.RadioItems(
                 id='institution_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -225,10 +226,10 @@ dataSourceFilters = html.Div([
             dcc.RadioItems(
                 id='peer_review_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -250,10 +251,10 @@ dataSourceFilters = html.Div([
             dcc.RadioItems(
                 id='field_reported_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -275,10 +276,10 @@ dataSourceFilters = html.Div([
             dcc.RadioItems(
                 id='lab_reported_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -301,10 +302,10 @@ dataSourceFilters = html.Div([
             dcc.RadioItems(
                 id='qa_qc_selector',
                 options=[
-                    {'label': 'All ', 'value': 'all'},
+                    {'label': 'All ', 'value': 'All'},
                     {'label': 'Customize ', 'value': 'custom'}
                 ],
-                value='all',
+                value='All',
                 labelStyle={"display": "inline-block",
                             "margin-right": "1rem",
                             "font-weight": "300"},
@@ -332,10 +333,10 @@ lake_filter = html.Div([
     dcc.RadioItems(
         id='lake_selector',
         options=[
-            {'label': 'All ', 'value': 'all'},
+            {'label': 'All ', 'value': 'All'},
             {'label': 'Customize ', 'value': 'custom'}
         ],
-        value='all',
+        value='All',
         labelStyle={"display": "inline-block",
                     "margin-right": "1rem",
                     "font-weight": "300"},
@@ -374,7 +375,7 @@ def show_full_lake_list(lake_selection):
 @app.callback(Output('lake_statuses', 'value'),
               [Input('lake_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(LAKES.values())
     else:
         return []
@@ -394,7 +395,7 @@ def show_full_lake_list(substrate_selection):
 @app.callback(Output('substrate_types', 'value'),
               [Input('substrate_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(Substrate_Status.values())
     else:
         return []
@@ -412,10 +413,11 @@ def show_full_lake_list(mc_selection):
     else:
         return {'display': 'none'}
 
+
 @app.callback(Output('microcystin_types', 'value'),
-              [Input('substrate_selector', 'value')])
+              [Input('microcystin_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(Microcystin_Method.values())
     else:
         return []
@@ -435,7 +437,7 @@ def show_sample_list(sample_selection):
 @app.callback(Output('sample_types', 'value'),
               [Input('sample_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(Sample_Types.values())
     else:
         return []
@@ -457,7 +459,7 @@ def show_full_lake_list(field_selection):
 @app.callback(Output('field_method_types', 'value'),
               [Input('field_method_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(Field_Methods.values())
     else:
         return []
@@ -477,7 +479,7 @@ def show_full_lake_list(field_selection):
 @app.callback(Output('filt_options', 'value'),
               [Input('filtered_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
+    if selector == 'All':
         return list(ynLabels.values())
     else:
         return []
@@ -496,8 +498,8 @@ def show_full_list(field_selection):
 @app.callback(Output('institution_options', 'value'),
               [Input('institution_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
-        return list(INSTITUTIONS.keys())
+    if selector == 'All':
+        return list(INSTITUTIONS.values())
     else:
         return []
 
@@ -514,8 +516,8 @@ def show_full_list(field_selection):
 @app.callback(Output('pr_options', 'value'),
               [Input('peer_review_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
-        return list(ynLabels.keys())
+    if selector == 'All':
+        return list(ynLabels.values())
     else:
         return []
 
@@ -532,8 +534,8 @@ def show_full_list(field_selection):
 @app.callback(Output('fr_options', 'value'),
               [Input('field_reported_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
-        return list(ynLabels.keys())
+    if selector == 'All':
+        return list(ynLabels.values())
     else:
         return []
 
@@ -550,8 +552,8 @@ def show_full_list(field_selection):
 @app.callback(Output('lm_options', 'value'),
               [Input('lab_reported_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
-        return list(ynLabels.keys())
+    if selector == 'All':
+        return list(ynLabels.values())
     else:
         return []
 
@@ -568,8 +570,8 @@ def show_full_list(field_selection):
 @app.callback(Output('qc_options', 'value'),
               [Input('qa_qc_selector', 'value')])
 def display_type(selector):
-    if selector == 'all':
-        return list(ynLabels.keys())
+    if selector == 'All':
+        return list(ynLabels.values())
     else:
         return []
 
@@ -654,7 +656,6 @@ summaryboxes = html.Div(
 
 body = html.Div(
     [
-        #summaryboxes,
         html.Div(
             [
                 dbc.Col([filtersAvailable], className="three columns"),
@@ -664,7 +665,6 @@ body = html.Div(
                 dbc.Col([choose2Filtered], className="four columns"),
 
             ], className="twelve columns"),
-
         html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(df)),
     ], id="mainContainer",
     style={

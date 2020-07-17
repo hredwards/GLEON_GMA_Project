@@ -1,11 +1,3 @@
-""""
-Variables introduced here:
-client   ---- very important, this establishes client connection
-MasterData ---  this pulls the csv file with ALL data aggregated in it; used for graphs on homepage from S3
-dfMasterData  --- this uses panda to read the MasterData csv
-MetadataDB  ---  this pulls the csv file with ALL Metadata aggregated in it
-dfMetadataDB --- this uses panda to read the MetadataDB csv
-"""
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -74,7 +66,8 @@ creds = client.get_object(Bucket='gleongmabucket', Key='logins.csv')
 dfCreds = pd.read_csv(io.BytesIO(creds['Body'].read()))
 
 
-user_pwd = dfCreds.iloc[ : , 1]
-user_names = dfCreds.iloc[ : , 0]
+user_pwd = dfCreds["pass"]
+user_names = dfCreds["user"]
 creds = dict(zip(list(user_names), list(user_pwd)))
-usersNames = dfCreds.iloc[:, 2]
+usersNames = dfCreds["name"]
+userId = dfCreds["id"]

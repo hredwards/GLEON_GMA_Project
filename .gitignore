@@ -6,3 +6,8 @@
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# old py files
+registrationLogin.py
+NewGraphs.py
+NewLogin.py

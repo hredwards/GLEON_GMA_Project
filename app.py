@@ -5,14 +5,13 @@ import pandas as pd
 from dash.dependencies import Input, Output
 from navbar import NavBar
 import dash_bootstrap_components as dbc
-
-
-
+import os
 
 external_stylesheets = ['/assets/main.css']
 app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
 server = app.server
-
+app.server.secret_key = os.environ("Flask_SK")
+app.title = "GLEON GMA Project"
 
 app.layout = html.Div([
     dcc.Location(id = 'url', refresh = True),
@@ -20,4 +19,3 @@ app.layout = html.Div([
     html.Div(id = 'page-content')
 ],
 )
-

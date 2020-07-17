@@ -6,6 +6,21 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 from dash.dependencies import Input, Output
+from Layouts import About, Data, Contact, Upload #, Login
+from navbar import NavBar
+import boto3
+import io
+from botocore.client import Config
+from app import app
+import os
+from s3References import session, client, usersNames
+from ViewFilteredData import filtersAvailable, FilteredView
+from Homepage import Homepage
+from LoginWithSessions import Login
+from flask import g
+
+
+"""
 from Homepage import Homepage
 from About import About
 from Data import Data
@@ -13,17 +28,10 @@ from ViewFilteredData import FilteredView
 from Contact import Contact
 from Login import Login, login_form
 from Upload import Upload
-from navbar import NavBar
-import boto3
-import io
-from botocore.client import Config
-from app import app, server
-import os
-from s3References import session, client, usersNames
 
+"""
 
-app.config['suppress_callback_exceptions'] = True
-server = app.server
+app.config['suppress_callback_exceptions'] = False
 
 
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
@@ -45,24 +53,26 @@ This returns the page layout based on pathname; these are all defined in their r
 @app.callback(Output('page-content', 'children'),
             [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/PageHomepage':
+    if pathname == '/Homepage':
         return Homepage()
     elif pathname == '/':
         return Homepage()
     elif pathname == '/FilterData':
         return FilteredView()
-    elif pathname == '/PageAbout':
+    elif pathname == '/About':
         return About()
-    elif pathname == '/PageData':
+    elif pathname == '/Data':
         return Data()
-    elif pathname == '/PageContact':
+    elif pathname == '/Contact':
         return Contact()
-    elif pathname == '/PageLogin':
+    elif pathname == '/Login':
         return Login()
-    elif pathname == '/PageUpload':
+    elif pathname == '/Upload' and g.user:
         return Upload()
     else:
         return Homepage()
+
+
 
 """"
 This Callback just uses the url/pathname to determine which page is active.
@@ -76,19 +86,19 @@ which page you are on
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
-    if pathname == "/PageHomepage":
+    if pathname == "/Homepage":
         return True, False, False, False, False, False
     elif pathname == "/":
         return True, False, False, False, False, False
-    elif pathname == "/PageAbout":
+    elif pathname == "/About":
         return False, True, False, False, False, False
     elif pathname == "/FilterData":
         return False, False, True, False, False, False
-    elif pathname == "/PageData":
+    elif pathname == "/Data":
         return False, False, False, True,  False, False
-    elif pathname == "/PageContact":
+    elif pathname == "/Contact":
         return False, False, False, False, True, False
-    elif pathname == "/PageLogin":
+    elif pathname == "/Login":
         return False, False, False, False, False, True
     else:
         return False, False, False, False, False, False

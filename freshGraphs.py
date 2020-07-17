@@ -1,17 +1,13 @@
-import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 import pandas as pd
-import datetime as dt
 from dash.dependencies import Input, Output
 from app import app
 import numpy as np
-from settings import months, USEPA_LIMIT, WHO_LIMIT
+from OldCode.settings import USEPA_LIMIT, WHO_LIMIT
 import plotly.graph_objs as go
-import plotly.express as px
-from s3References import dfMasterData, dfMetadataDB, dfexampleSheet, dfcsvOutline, pullMasterdata
-
+from s3References import dfMasterData, dfMetadataDB, dfcsvOutline, pullMasterdata, pullMetaDB
 
 app.config['suppress_callback_exceptions'] = True
 
@@ -227,7 +223,7 @@ Mapbox Plot -- Microcystin Concentration Geographically; all data (unfiltered)
 """
 mapbox_access_token = 'pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w'
 
-layout = dict(
+mapLayout = dict(
     #autosize=True,
     automargin=True,
     margin=dict(
@@ -261,9 +257,11 @@ layout = dict(
     ),
 )
 
-
-
-def geo_concentration_plot(selected_data):
+@app.callback(
+    Output('map_MCConc', 'figure'),
+    [Input('intermediate-value', 'children')])
+def update_output(jsonified_data):
+    selected_data = df
     data = []
     opacity_level = 0.8
     MC_conc = selected_data['Microcystin (ug/L)']
@@ -295,49 +293,9 @@ def geo_concentration_plot(selected_data):
         visible=True,
         name="MC > WHO Limit",
         marker=dict(color="red", opacity=opacity_level)))
-    fig=dict(data = data, layout= layout)
+    fig = dict(data=data, layout=mapLayout)
     return fig
 
-
-
-@app.callback(
-    Output('map_MCConc', 'figure'),
-    [Input('intermediate-value', 'children')]
-)
-def update_output(jsonified_data):
-    data = []
-    opacity_level = 0.8
-    MC_conc = df['Microcystin (ug/L)']
-    # make bins
-    b1 = df[MC_conc <= USEPA_LIMIT]
-    b2 = df[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
-    b3 = df[MC_conc > WHO_LIMIT]
-    data.append(go.Scattermapbox(
-        lon=b1['LONG'],
-        lat=b1['LAT'],
-        mode='markers',
-        text=b1["Body of Water Name"],
-        visible=True,
-        name="MC <= USEPA Limit",
-        marker=dict(color="green", opacity=opacity_level)))
-    data.append(go.Scattermapbox(
-        lon=b2['LONG'],
-        lat=b2['LAT'],
-        mode='markers',
-        text=b2["Body of Water Name"],
-        visible=True,
-        name="MC <= WHO Limit",
-        marker=dict(color="orange", opacity=opacity_level)))
-    data.append(go.Scattermapbox(
-        lon=b3['LONG'],
-        lat=b3['LAT'],
-        mode='markers',
-        text=b3["Body of Water Name"],
-        visible=True,
-        name="MC > WHO Limit",
-        marker=dict(color="red", opacity=opacity_level)))
-    fig = dict(data=data, layout=layout)
-    return fig
 
 mapPlot = html.Div([dcc.Graph(id="map_MCConc")], className="pretty_container graph")
 
@@ -454,47 +412,30 @@ Total Phosphorus vs Total Nitrogen (filtered data)
 # The app callback just runs the tn_tp_all definition and outputs the returned figure as a graph figure here
 # This definition is pulled in homepage.py to print the output on the homepage
 
-def filter_dataframe(df, lake_name, year_slider, month, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    if type(lake_name) is not list:
-        lake_name = [lake_name]
+def filter_dataframe(df, lake_name, year_slider, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA):
+    lake_name = list(lake_name)
+    substrate = list(substrate)
+    microcystin_types = list(microcystin_types)
+    sample = list(sample)
+    field = list(field)
+    filtered = list(filtered)
+    institution = list(institution)
+    peerRev = list(peerRev)
+    fieldRep = list(fieldRep)
+    labRep = list(labRep)
+    QA = list(QA)
 
-    if type(substrate) is not list:
-        substrate = [substrate]
-
-    if type(microcystin_types) is not list:
-        microcystin_types = [microcystin_types]
-
-    if type(sample) is not list:
-        sample = [sample]
-
-    if type(field) is not list:
-        field = [field]
-
-    if type(filter) is not list:
-        filter = [filter]
-
-    if type(institution) is not list:
-        institution = [institution]
-
-    if type(peerRev) is not list:
-        peerRev = [peerRev]
-
-    if type(fieldRep) is not list:
-        fieldRep = [fieldRep]
-
-    if type(labRep) is not list:
-        labRep = [labRep]
-
-    if type(QA) is not list:
-        QA = [QA]
 
 # If any filter options are empty, return an empty dataframe. This is necessary bc without it, it returns key errors or doesn't remove the very last thing user says to remove
-    if not microcystin_types or not lake_name or not institution:
+    if not lake_name or not substrate or not microcystin_types or not sample or not field or not filtered or not institution or not peerRev or not fieldRep or not labRep or not QA:
         dff= dfcsvOutline
+
 
     else:
         yearRange = list(range(year_slider[0], year_slider[1] + 1, 1))
-        monthRange = list(range(month[0], month[1] + 1, 1))
+        monthRange = list(range(month_value[0], month_value[1] + 1, 1))
+
+        dfMeta = pullMetaDB()
 
 
         dffMeta = dfMeta[dfMeta['Microcystin_method'].isin(microcystin_types)
@@ -502,7 +443,7 @@ def filter_dataframe(df, lake_name, year_slider, month, substrate, microcystin_t
                  & (dfMeta['Field_method_YN'].isin(fieldRep))
                  & (dfMeta['Substrate'].isin(substrate))
                  & (dfMeta['Sample_Type'].isin(sample))
-                 & (dfMeta['Filter_YN'].isin(filter))
+                 & (dfMeta['Filter_YN'].isin(filtered))
                  & (dfMeta['Lab_method'].isin(labRep))
                  & (dfMeta['Published'].isin(peerRev))
                  & (dfMeta['QA_QC'].isin(QA))
@@ -511,8 +452,9 @@ def filter_dataframe(df, lake_name, year_slider, month, substrate, microcystin_t
 
         if dffMeta.empty:
             dff = dfcsvOutline
-        else:
 
+
+        else:
             dffMeta = list(dffMeta.apply(set)[0])
             dffMeta = sorted(dffMeta)
 
@@ -521,7 +463,6 @@ def filter_dataframe(df, lake_name, year_slider, month, substrate, microcystin_t
                      & (df['Month'].isin(monthRange))
                      & (df['RefID'].isin(dffMeta))
                      ]
-
     return dff
 
 
@@ -548,10 +489,8 @@ tn_tp_scatter_filter = html.Div([dcc.Graph(id="tn_tp_filter_scatter")], classNam
                Input('fr_options', 'value'),
                Input('lm_options', 'value'),
                Input('qc_options', 'value')])
-def make_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    current_df = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
-
-
+def return_filtered_TNTP_figure(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA):
+    current_df = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA)
     # Find MC concentration to compare to WHO/USEPA limits; filter into bins accordingly
     MC_conc = current_df['Microcystin (ug/L)']
 
@@ -668,8 +607,8 @@ overTimeFiltered= html.Div([
      Input('fr_options', 'value'),
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
-def update_graph(selected_option, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
+def update_graph(selected_option, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA):
+    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -775,8 +714,8 @@ choose2Filtered= html.Div([
      Input('fr_options', 'value'),
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
-def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
+def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA):
+    dff = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA)
     dff = dff[dff[yaxis_column_name].notnull()
               & dff[yaxis_column_name]>0]
 
@@ -840,8 +779,8 @@ def update_graph(selected_option, xaxis_column_name, yaxis_column_name, jsonifie
      Input('fr_options', 'value'),
      Input('lm_options', 'value'),
      Input('qc_options', 'value')])
-def update_graph(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA):
-    selected_data = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filter, institution, peerRev, fieldRep, labRep, QA)
+def update_graph(jsonified_data, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA):
+    selected_data = filter_dataframe(df, lake_statuses, year_value, month_value, substrate, microcystin_types, sample, field, filtered, institution, peerRev, fieldRep, labRep, QA)
     data = []
     opacity_level = 0.8
     MC_conc = selected_data['Microcystin (ug/L)']
@@ -873,7 +812,7 @@ def update_graph(jsonified_data, lake_statuses, year_value, month_value, substra
         visible=True,
         name="MC > WHO Limit",
         marker=dict(color="red", opacity=opacity_level)))
-    fig = dict(data=data, layout=layout)
+    fig = dict(data=data, layout=mapLayout)
     return fig
 
 

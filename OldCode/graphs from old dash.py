@@ -2,11 +2,10 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
-from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
-import data_analysis as da
-from settings import months, metadataDB
+from OldCode import data_analysis as da
+from OldCode.settings import months, metadataDB
 import db_engine as db
 from db_info import db_info
 import urllib.parse
@@ -614,7 +613,7 @@ def show_filter_size(visibility_state):
     [dash.dependencies.Input('refresh-db-button', 'n_clicks')])
 def upload_file(n_clicks):
     # read from MetadataDB to update the table
-    metadataDB = pd.read_csv("data/MetadataDB.csv")
+    metadataDB = pd.read_csv("../data/MetadataDB.csv")
     return get_metadata_table_content(metadataDB)
 
 

@@ -18,7 +18,7 @@ def route_login():
     password = data.get('password')
 
     if username not in creds.keys() or  creds[username] != password:
-        return flask.redirect('/PageLogin')
+        return flask.redirect('/Login')
     else:
 
         # Return a redirect with
@@ -44,7 +44,7 @@ body = html.Div([
     html.Div(id='custom-auth-frame'),
     html.Div(id='custom-auth-frame-1', style={'textAlign': 'right', "background": "black"}),
     login_form,
-    dbc.Row(dbc.Button("Want a login?", href="/PageContact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
+    dbc.Row(dbc.Button("Want a login?", href="/Contact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
 ], className="pretty_container four columns offset-by-four columns",
 )
 

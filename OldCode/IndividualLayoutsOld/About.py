@@ -160,6 +160,4 @@ def About():
     layout = body
     return layout
 
-AboutLayout = html.Div([
-        body
-    ])
+

@@ -1,22 +1,14 @@
 ### Just for testing S3 rn; move to graphys.py later ###
 
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import pandas as pd
-from dash.dependencies import Input, Output
-import dash_table
 from app import app
-import numpy as np
-import data_analysis as da
-from settings import months, USEPA_LIMIT, WHO_LIMIT
 #import db_engine as db
 #from db_info import db_info
 #import urllib.parse
 import json
 
 ## pulls s3 info from s3References ##
-from s3References import client, MasterData, dfMasterData, MetadataDB, dfMetadataDB
+from s3References import dfMasterData
 
 app.config['suppress_callback_exceptions'] = True
 

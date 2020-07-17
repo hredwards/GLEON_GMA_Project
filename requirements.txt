@@ -77,5 +77,7 @@ urllib3==1.24.3
 xlrd==1.2.0
 wcwidth==0.1.9
 websocket-client==0.57.0
+wtforms==2.3.1
+flask-wtf==0.14.3
 Werkzeug==1.0.0
 zipp==1.2.0

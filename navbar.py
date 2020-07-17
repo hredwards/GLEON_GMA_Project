@@ -47,12 +47,12 @@ This is where the Navigation links are defined; the only difference is which pag
 
 NavigationLinks = dbc.Row(
     children=[
-        dbc.NavItem(dbc.NavLink("Home", href="/PageHomepage", id="page-1-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
-        dbc.NavItem(dbc.NavLink("About", href="/PageAbout", id="page-2-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
+        dbc.NavItem(dbc.NavLink("Home", href="/Homepage", id="page-1-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
+        dbc.NavItem(dbc.NavLink("About", href="/About", id="page-2-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
         dbc.NavItem(dbc.NavLink("Filter Graphs", href="/FilterData", id="page-3-link", style={"color": "#000066", "font-size": "1.8rem", "padding-bottom":"0rem"})),
-        dbc.NavItem(dbc.NavLink("Data", href="/PageData", id="page-4-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
-        dbc.NavItem(dbc.NavLink("Contact", href="/PageContact", id="page-5-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
-        dbc.NavItem(dbc.NavLink("Login", href="/PageLogin", id="page-6-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
+        dbc.NavItem(dbc.NavLink("Data", href="/Data", id="page-4-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
+        dbc.NavItem(dbc.NavLink("Contact", href="/Contact", id="page-5-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
+        dbc.NavItem(dbc.NavLink("Login", href="/Login", id="page-6-link", style={"color":"#000066", "font-size":"1.8rem", "padding-bottom":"0rem"})),
     ],
     style={"color":"green", 'float':'right'},
 )
