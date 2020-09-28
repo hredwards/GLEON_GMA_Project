@@ -379,7 +379,7 @@ def uploadPage():
             HalsNamedInlineRadioItems(
                 name='Would you like to password protect this file? If so, users will not be able to download it from the data page.',
                 id="pw-protect",
-                options=["Yes", "No"],
+                options=data_Review_options,
             ),
             dcc.Input(
                 placeholder='Password',
