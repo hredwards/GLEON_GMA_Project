@@ -701,7 +701,7 @@ def uploadPage():
             HalsNamedInlineRadioItems(
                 name='Would you like to make this file private to your account? If so, other users will not be able to download it from the data page but the data will still be represented in the graphs on the home and filter pages.',
                 id="pw-protect",
-                options=["Yes", "No"],
+                options=data_Review_options,
             )
         ]),
 
