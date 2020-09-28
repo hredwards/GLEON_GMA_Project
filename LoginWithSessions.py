@@ -129,8 +129,9 @@ def before_request_getUserTable():
 """
 
 
+"""
 def getTableDf(adminStat, userFullName):
-    if adminStat is True:
+    if adminStat is False:
         table_df = dfMetadataDB[
             ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'PWYN', 'Microcystin_method', 'N_lakes',
              'N_samples']]
@@ -139,7 +140,7 @@ def getTableDf(adminStat, userFullName):
         welcomeMessage = "Hey " + str(
             userFullName) + "! Here you can download any file that has uploaded to our collection."
 
-    elif adminStat is False:
+    elif adminStat is True:
         table_df = dfMetadataDB[
             ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'PWYN', 'Microcystin_method', 'N_lakes',
              'N_samples']]
@@ -215,14 +216,19 @@ def UserPage():
         user = [x for x in users if x.fullName == session['user_fullName']][0]
         # load the appropriate metadata for logged in user
 
-        if session['user_fullName'] == 'Ted Harris' or 'Hallie Edwards':
-            return getTableDf(adminStat=True, userFullName = session['user_fullName'])
+        if user.fullName == 'Ted Harris' or 'Hallie Edwards':
+            return getTableDf(adminStat=False, userFullName = user.fullName)
         else:
-            return getTableDf(adminStat=False, userFullName = session['user_fullName'])
+            return getTableDf(adminStat=True, userFullName = user.fullName)
 
 
 
 """
+
+
+
+
+
 def UserPage():
     if 'user_fullName' in session:
         user = [x for x in users if x.fullName == session['user_fullName']][0]
@@ -305,7 +311,7 @@ def UserPage():
     layout = dataPageUserSpecific
     return layout
 
-
+"""
 def AdminUserPage():
     if 'user_fullName' in session:
         user = [x for x in users if x.fullName == session['user_fullName']][0]
@@ -391,7 +397,9 @@ def AdminUserPage():
 
 def newUserPageTest(adminStat):
 
+
 """
+
 
 
 
