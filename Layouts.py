@@ -4,9 +4,11 @@ import dash_html_components as html
 from app import app
 from dash.dependencies import Input, Output
 import dash_table
+import pandas as pd
 import flask
 from s3References import session, client, MasterData, pullMasterdata, pullMetaDB, Bucket, UploadFolder, dfexampleSheet, AssetsFolder
-from uploadDownload import uploadBar
+from flask import g, session as flaskSession
+
 # from freshGraphs import convert_to_json, overTimeAll,
 from freshGraphs import tn_tp_scatter_all, tn_tp_scatter_filter, choose2All, choose2Filtered, mapPlotFiltered, overTimeAll, overTimeFiltered, mapPlot, convert_to_json
 from ViewFilteredData import filtersAvailable, FilteredView
@@ -14,40 +16,15 @@ from Homepage import Homepage
 
 app.config['suppress_callback_exceptions'] = True
 
+
 s3 = session.resource('s3')
 dfMasterData = pullMasterdata()
 dfMetadataDB = pullMetaDB()
 
 """
-HomePage 
-homepage = html.Div(
-    [
-        dbc.Col([
-            dbc.Row(html.H3("Welcome to the Global Microcystin Aggregation Project!"), justify="center", form=True),
+This has the layouts for every page except for the Homepage, Login, and Filtered Graph pages
 
-            dbc.Row(html.P("Below are some interactive graphs visualizing all the data that has been uploaded so far. Visit "
-                       " the \'Filter Graphs\' page to apply filters to the dataset. Data can be downloaded from the \'Data\' page. Please login "
-                       "to upload data. If you would like to learn more, please visit our About page or contact us via information on the Contact page.", style={"padding":"1rem", "margin":"1rem"}), justify="center", form=True),
-            dbc.Row(dbc.Button("Learn More About the Project", href="/PageAbout", color="secondary", size="lg"), justify="center", form=True),], className="pretty_container twelve columns"),
-        html.Div(
-            [
-                dbc.Col([mapPlot], className="six columns"),
-                dbc.Col([tn_tp_scatter_all], className="six columns"),
-            ], className="twelve columns"),
-        html.Div(
-            [
-                dbc.Col([choose2All], className="six columns"),
-                dbc.Col([overTimeAll], className="six columns"),
-            ], className="twelve columns"),
-        html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(dfMasterData)),
-    ], className="twelve columns"
-)
-
-
-def Homepage():
-    layout = homepage
-    return layout
-
+In order: About, Data, Contact, Upload, UserPage
 
 """
 
@@ -155,7 +132,11 @@ def get_metadata_table_content(current_metadata):
 
 
 dataPageTable = dbc.Container([
-dash_table.DataTable(
+    dbc.Row(html.P(
+        "Here you can download any file that's been uploaded to our collection.", style={'textAlign':'center'}),
+        justify="center", form=True),
+
+    dash_table.DataTable(
         id='metadata_table',
         columns=[
             #{'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
@@ -176,6 +157,11 @@ dash_table.DataTable(
             'fontWeight': 'bold'
         },
     ),
+
+    dbc.Row(html.P(
+        "Select as many as you'd like, the one file you download will contain all entries from selected sets.",
+        style={'textAlign': 'center', 'margin': '2rem 0rem 0rem 0rem'}),
+        justify="center", form=True),
 
     # Export the selected datasets in a single csv file
     dbc.Row(html.A(html.Button(id='export-data-button', children='Download Selected Data',
@@ -220,8 +206,8 @@ dataPageTablepwProtect = dbc.Container([
             {'name': 'Number of Lakes', 'id': 'N_lakes'},
             {'name': 'Number of Samples', 'id': 'N_samples'}, ],
         data=get_metadata_table_content_pw_protect(dfMetadataDB),
-        row_selectable='multi',
-        selected_rows=[],
+        #row_selectable='multi',
+        #selected_rows=[],
         style_as_list_view=True,
         style_cell={'textAlign': 'left'},
         style_header={
@@ -234,51 +220,28 @@ dataPageTablepwProtect = dbc.Container([
 
 dataPage = html.Div(
     [
-       dbc.Row(html.H3("Welcome to the Data Page!"), justify="center", form=True),
-        dbc.Row(html.P("Here you can download any file that's been uploaded to our collection. Select as many as you'd like, the one file you download will contain all entries from selected sets.", style={"padding":"2rem"}), justify="center", form=True),
-        dbc.Row(dataPageTable, justify="center", form=True),
-        dbc.Row(dataPageTablepwProtect, justify="center", form=True)
-
+        html.Div(
+            [
+                dbc.Row(html.H3("Download Available Datasets"), justify="center", form=True),
+                dbc.Row(dataPageTable, justify="center", form=True)
+            ],
+            className="pretty_container ten columns offset-by-one column"),
+        dbc.Row([], className="separatingLine twelve columns"),
+        html.Div(
+            [
+                dbc.Row(html.H3("Protected Datasets"), justify="center", form=True),
+                dbc.Row(dataPageTablepwProtect, justify="center", form=True)
+            ],
+            className="pretty_container ten columns offset-by-one column"),
     ],
-    className="pretty_container twelve columns",
-)
+    className="ten columns offset-by-one column"),
 
 
 def Data():
     layout = dataPage
     return layout
 
-"""
-Filtered View
 
-filtView = html.Div(
-    [
-        #summaryboxes,
-        html.Div(
-            [
-                dbc.Col([filtersAvailable], className="three columns"),
-                dbc.Col([mapPlotFiltered], className="five columns"),
-                dbc.Col([tn_tp_scatter_filter], className="four columns"),
-                dbc.Col([overTimeFiltered], className="five columns"),
-                dbc.Col([choose2Filtered], className="four columns"),
-
-            ], className="twelve columns"),
-
-        html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(dfMasterData)),
-    ], id="mainContainer",
-    style={
-        "display": "flex",
-        "flex-direction": "column"
-    },
-    className="twelve columns",
-)
-
-
-def FilteredView():
-    layout = filtView
-    return layout
-
-"""
 
 
 
@@ -328,122 +291,198 @@ contact = html.Div(
 
 )
 
-
-
 def Contact():
     layout = contact
     return layout
 
 
 
-"""
-Login
 
-
-# Create a login route
-_app_route = '/Upload'
-
-@app.server.route('/login', methods=['POST'])
-def route_login():
-    data = flask.request.form
-    username = data.get('username')
-    password = data.get('password')
-
-    if username not in creds.keys() or  creds[username] != password:
-        return flask.redirect('/Login')
-    else:
-
-        # Return a redirect with
-        rep = flask.redirect(_app_route)
-        rep.set_cookie('custom-auth-session', username)
-        return rep
-
-
-login_form = dbc.Row([
-    html.Form([
-        dcc.Input(placeholder='username', name='username', type='text'),
-        dcc.Input(placeholder='password', name='password', type='password'),
-        html.Button('Login', type='submit')
-    ], action='/login', method='post')
-], justify="center", form=True,   className="twelve columns",
-)
-
-
-login = html.Div([
-    dbc.Row(html.H3("Welcome to the Login Page!"), justify="center", form=True, className="twelve columns"),
-    html.Div(id='custom-auth-frame'),
-    html.Div(id='custom-auth-frame-1', style={'textAlign': 'right', "background": "black"}),
-    login_form,
-    dbc.Row(dbc.Button("Want a login?", href="/Contact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
-], className="pretty_container four columns offset-by-four columns",
-)
-
-
-def Login():
-    layout = login
-    return layout
-
-
-
-
-"""
 
 
 
 """
 Upload
-"""
+
 
 def Upload():
     layout = html.Div([
-        uploadBar
+        uploadPage
     ], className="page-content")
     return layout
 
 
 """
-Register Account
+
+
+
+
 """
 
-registration_form = dbc.Row([
-    html.Form([
-        dcc.Input(placeholder='username', name='username', type='text'),
-        dcc.Input(placeholder='password', name='password', type='password'),
-        html.Button('Login', type='submit')
-    ], action='/register', method='post')
-], justify="center", form=True,   className="twelve columns",
-)
+def get_metadata_table_content_User_Specific(current_metadata):
+    '''
+        returns the data for the specified columns of the metadata data table
+    '''
+
+    if flaskSession.get('user_id', 0) != 0:
+        table_df = current_metadata[
+            ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'PWYN', 'Microcystin_method', 'N_lakes',
+             'N_samples']]
+        table_refid = table_df["RefID"]
+        table_df = table_df[table_refid == g.user_id]
+
+    else:
+        table_df = pd.DataFrame()
+
+    return table_df.to_dict("rows")
 
 
-register = html.Div([
-    dbc.Row(html.H3("Welcome to the Login Page!"), justify="center", form=True, className="twelve columns"),
-    html.Div(id='custom-auth-frame'),
-    html.Div(id='custom-auth-frame-1', style={'textAlign': 'right', "background": "black"}),
-    registration_form,
-    dbc.Row(dbc.Button("Want a login?", href="/Contact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
-], className="pretty_container four columns offset-by-four columns",
-)
+
+userPageTable = dbc.Container([
+    dbc.Row(html.P(
+        "Welcome, NAME. Here you can download any file that you have uploaded to our collection.", style={'textAlign':'center'}),
+        justify="center", form=True),
+
+    dash_table.DataTable(
+        id='metadata_table_userPage',
+        columns=[
+            #{'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
+            #{'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
+            {'name': 'Database Name', 'id': 'DB_name'},
+            {'name': 'Uploaded By', 'id': 'Uploaded_by'},
+            {'name': 'Upload Date', 'id': 'Upload_date'},
+            {'name': 'Microcystin Method', 'id': 'Microcystin_method'},
+            {'name': 'Number of Lakes', 'id': 'N_lakes'},
+            {'name': 'Number of Samples', 'id': 'N_samples'}, ],
+        data=get_metadata_table_content_User_Specific(dfMetadataDB),
+        row_selectable='multi',
+        selected_rows=[],
+        style_as_list_view=True,
+        style_cell={'textAlign': 'left'},
+        style_header={
+            'backgroundColor': 'white',
+            'fontWeight': 'bold'
+        },
+    ),
+
+    dbc.Row(html.P(
+        "Select as many as you'd like, the one file you download will contain all entries from selected sets.",
+        style={'textAlign': 'center', 'margin': '2rem 0rem 0rem 0rem'}),
+        justify="center", form=True),
+
+    # Export the selected datasets in a single csv file
+    dbc.Row(html.A(html.Button(id='export-data-button', children='Download Selected Data',
+                       style={
+                           'margin': '1rem 0px 1rem 1rem'
+                       }),
+           href='',
+           id='download-link-UserSpecific',
+           download='data.csv',
+           target='_blank'
+           ),justify="center", form=True)
+], style={"max-width":"90%"},)
 
 
-def Register():
-    layout = register
+dataPageUserSpecific = html.Div(
+    [
+        html.Div(
+            [
+                dbc.Row(html.H3("Download Available Datasets"), justify="center", form=True),
+                dbc.Row(userPageTable, justify="center", form=True)
+            ],
+            className="pretty_container ten columns offset-by-one column"),
+
+    ],
+    className="ten columns offset-by-one column")
+
+
+def UserPage():
+    if flaskSession.get('user_id', 0) != 0:
+        layout = dataPageUserSpecific
+    return layout
+"""
+
+
+"""
+def get_metadata_table_content_User_Specific(current_metadata):
+    if flaskSession.get('user_id', 0) != 0:
+        table_df = current_metadata[
+            ['RefID', 'DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'PWYN', 'Microcystin_method', 'N_lakes',
+             'N_samples']]
+        table_refid = table_df["RefID"]
+        table_df = table_df[table_refid == g.user_id]
+        table_df = table_df.to_dict("rows")
+
+    else:
+        table_df = pd.DataFrame()
+        table_df.to_dict("rows")
+
+    return table_df
+
+userPageTable = dbc.Container([
+    dbc.Row(html.P(
+        "Welcome, NAME. Here you can download any file that you have uploaded to our collection.",
+        style={'textAlign': 'center'}),
+        justify="center", form=True),
+
+    dash_table.DataTable(
+        id='metadata_table_userPage',
+        columns=[
+            # {'name': 'Reference ID', 'id': 'RefID', 'hidden': True},
+            # {'name': 'Database ID', 'id': 'DB_ID', 'hidden': True},
+            {'name': 'Database Name', 'id': 'DB_name'},
+            {'name': 'Uploaded By', 'id': 'Uploaded_by'},
+            {'name': 'Upload Date', 'id': 'Upload_date'},
+            {'name': 'Microcystin Method', 'id': 'Microcystin_method'},
+            {'name': 'Number of Lakes', 'id': 'N_lakes'},
+            {'name': 'Number of Samples', 'id': 'N_samples'}, ],
+        data=get_metadata_table_content_User_Specific(dfMasterData),
+        row_selectable='multi',
+        selected_rows=[],
+        style_as_list_view=True,
+        style_cell={'textAlign': 'left'},
+        style_header={
+            'backgroundColor': 'white',
+            'fontWeight': 'bold'
+        },
+    ),
+
+    dbc.Row(html.P(
+        "Select as many as you'd like, the one file you download will contain all entries from selected sets.",
+        style={'textAlign': 'center', 'margin': '2rem 0rem 0rem 0rem'}),
+        justify="center", form=True),
+
+    # Export the selected datasets in a single csv file
+    dbc.Row(html.A(html.Button(id='export-data-button', children='Download Selected Data',
+                               style={
+                                   'margin': '1rem 0px 1rem 1rem'
+                               }),
+                   href='',
+                   id='download-link-UserSpecific',
+                   download='data.csv',
+                   target='_blank'
+                   ), justify="center", form=True)
+], style={"max-width": "90%"}, )
+
+dataPageUserSpecific = html.Div(
+    [
+        html.Div(
+            [
+                dbc.Row(html.H3("Download Available Datasets"), justify="center", form=True),
+                dbc.Row(userPageTable, justify="center", form=True)
+            ],
+            className="pretty_container ten columns offset-by-one column"),
+
+    ],
+    className="ten columns offset-by-one column")
+
+def UserPage():
+    if flaskSession.get('user_id', 0) != 0:
+        layout = dataPageUserSpecific
     return layout
 
-"""
-Login to existing Account
-loginExisting = html.Div([
-    dbc.Row(html.H3("Welcome to the Login Page!"), justify="center", form=True, className="twelve columns"),
-    html.Div(id='custom-auth-frame'),
-    html.Div(id='custom-auth-frame-1', style={'textAlign': 'right', "background": "black"}),
-    login_form,
-    dbc.Row(dbc.Button("Want a login?", href="/Contact", color="secondary", style={"margin":"2rem"}), justify="center", form=True),
-], className="pretty_container four columns offset-by-four columns",
-)
 
-
-def LoginExisting():
-    layout = loginExisting
-    return layout
 
 
 """
+

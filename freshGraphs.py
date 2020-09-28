@@ -23,6 +23,9 @@ df = pullMasterdata()
 
 dfMeta = dfMetadataDB
 allColumnNames = list(dfMasterData.columns.values)
+excludeColumnNames = ["RefID", "DataContact", "LAT", "LONG", "Lat ", "Date Reported"]
+availColNames = [x for x in allColumnNames if x not in excludeColumnNames]
+
 
 
 dfcsvOutline['Year'] = pd.DatetimeIndex(dfcsvOutline['DATETIME']).year
@@ -71,7 +74,7 @@ def update_output(jsonified_data):
     b2 = current_df[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
     b3 = current_df[MC_conc > WHO_LIMIT]
 
-    # define the data of the graph. there's 3 scatter plots here, one for each bin defined above
+    # define the data of the graph. there's 3 scatter plots here, one for each bin defined –≠“e
     # This returns the values in log(10) for now. Might change to a log slider down the line
     data = [go.Scatter(
         x=np.log10(b1.loc[:, 'Total Nitrogen (ug/L)']),
@@ -124,7 +127,7 @@ def update_output(jsonified_data):
 """ 
 Choose 2 variables to compare (all data, unfiltered)
 """
-available_indicators = allColumnNames
+available_indicators = availColNames
 
 choose2All= html.Div([
     dcc.Graph(id='crossfilter-indicator-scatter'),

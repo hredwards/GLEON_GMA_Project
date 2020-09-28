@@ -7,6 +7,7 @@ from freshGraphs import tn_tp_scatter_all, choose2All, mapPlot, convert_to_json,
 from s3References import pullMasterdata
 
 app.config['suppress_callback_exceptions'] = True
+#app.title = "Homepage - GLEON GMA Project"
 
 
 
@@ -33,5 +34,6 @@ body = html.Div(
 
 def Homepage():
     layout = body
+    app.title = "Homepage - GLEON GMA Project"
     return layout
 

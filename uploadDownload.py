@@ -1,7 +1,7 @@
 import base64
 import os
 from urllib.parse import quote as urlquote
-
+from flask import g, session
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -23,7 +23,8 @@ import urllib.parse
 from Crypto.Cipher import AES
 import random
 import string
-app.config['suppress_callback_exceptions'] = True
+from LoginWithSessions import users
+app.config['suppress_callback_exceptions'] = False
 
 
 s3 = session.resource('s3')
@@ -88,8 +89,8 @@ Metadata
 
 """
 Upload Bar Layout and Callbacks
-"""
-## Step 1. Links to example csv
+
+## Step 3. Links to example csv
 exampleBar = dbc.Container([
     html.H5('Step 3. Download the outline file below and copy the appropriate data into the csv file.', id="Instructions"),
 
@@ -138,7 +139,297 @@ dragUpload = dbc.Container([
     html.Div(id='upload-output'),
 ],)
 
-## Step 1. Questions for Data Source Information
+
+"""
+
+
+def uploadPage():
+    if 'user_id' in session:
+        user = [x for x in users if x.id == session['user_id']][0]
+        g.user = user
+        user_name = user.username
+
+    else:
+        user_name = " "
+
+    ## Step 1. Questions for Data Source Information
+    uploadDataInfo = dbc.Container([
+        html.H5(
+            'Step 1. Fill out the Data Source questionnaire below with appropriate information and links as needed.',
+            id="Instructions"),
+
+        #### Identifying - Name, Institution, Database Name
+        dbc.Row([
+            html.Form([
+                dcc.Input(placeholder='Name', id='uploader-Name', value=str(user_name), type='text'),
+                dcc.Input(placeholder='Institution', id='user-inst', type='text'),
+                dcc.Input(placeholder='Database Name', id='db-name', type='text'),
+            ]),
+        ]),
+
+        #### Things with URL inputs - Peer Reviewed, Field Method, Lab Method, QA, Full QA
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Is the data peer reviewed or published?",
+                id="is-data-reviewed",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='publication-url',
+                style={'display': 'none'}),
+        ]),
+
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Is the field method reported?",
+                id="is-field-method-reported",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='field-method-report-url',
+                style={'display': 'none'}),
+        ]),
+
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Is the lab method reported?",
+                id="is-lab-method bui-reported",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='lab-method-report-url',
+                style={'display': 'none'}),
+        ]),
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name='Is the QA/QC data available?',
+                id="is-qaqc-available",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='qaqc-url',
+                style={'display': 'none'}
+            ),
+        ]),
+
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name='Is the full QA/QC data available upon request?',
+                id="is-full-qaqc-available",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='URL Link',
+                type='text',
+                id='full-qaqc-url',
+                style={'display': 'none'}
+            ),
+        ]),
+        # Cell Count
+        dbc.Row([
+            dbc.Row(html.P('Cell count method?')),
+            dbc.Row(
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    id='cell-count-url',
+                    style={'display': 'inline-block', 'margin-left': '.5rem', 'text-align': 'center'}
+
+                ),
+            ),
+        ]),
+
+        # Ancillary
+        dbc.Row([
+            dbc.Row(html.P('Ancillary data available?')),
+            dbc.Row(
+                dcc.Textarea(
+                    placeholder='Description of parameters or URL link',
+                    id='ancillary-data',
+                    style={'display': 'inline-block', 'margin-left': '.5rem', 'text-align': 'center'}
+
+                ),
+            ),
+        ]),
+    ], )
+
+    ## Step 2. Questions for Methodology Information
+    uploadMethodologies = dbc.Container([
+        html.H5(
+            'Step 2. Fill out the Methodology questionnaire below with appropriate information and links as needed.',
+            id="Instructions"),
+
+        # Substrate
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Substrate",
+                id="substrate-option",
+                options=Substrate_Status_options,
+            )], className="uploadOption"),
+
+        # Sample Type
+        dbc.Row([HalsNamedInlineRadioItems(
+            name="Sample Types",
+            id="sample-type-option",
+            options=Sample_Types_options,
+        ), ]),
+
+        # Field Method
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Field Method",
+                id="field-method-option",
+                options=Field_Methods_options
+            ),
+            dcc.Input(
+                placeholder='Depth Integrated (m)',
+                type='text',
+                id='vertically-depth-integrated',
+                style={'display': 'none'}
+            ),
+            dcc.Input(
+                placeholder='Depth Sampled (m)',
+                type='text',
+                id='discrete-depth-sampled',
+                style={'display': 'none'}
+            ),
+            dcc.Input(
+                placeholder='Depth of Sample (m)',
+                type='text',
+                id='spatially-integrated-depth',
+                style={'display': 'none'}
+            ),
+            dcc.Input(
+                placeholder='# of samples integrated',
+                type='text',
+                id='num-spatially-integrated-samples',
+                style={'display': 'none'}
+            ),
+        ]),
+
+        #### Microcystin Method and filtering
+        dbc.Row([HalsNamedInlineRadioItems(
+            name="Microcystin Method",
+            id="microcystin-method",
+            options=Microcystin_Method_options,
+        ), ]),
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name="Was Sample Filtered?",
+                id="sample-filtered",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='Filter Size (μm)',
+                type='text',
+                id='filter-size',
+                style={'display': 'none'}
+            ),
+        ]),
+
+    ], )
+
+
+    ## Step 3. Links to example csv
+    exampleBar = dbc.Container([
+        html.H5('Step 3. Download the outline file below and copy the appropriate data into the csv file.',
+                id="Instructions"),
+
+        dbc.Row(html.A("Download Datasheet Outline File", href=dfexampleSheet, target='blank',
+                       download='GLEON_GMA_OUTLINE.csv',
+                       className="mr-1", style={'textAlign': 'center', "padding": "2rem .5rem 2rem .5rem"}),
+                justify="center", form=True),
+    ])
+
+    ## Step 4. Spot to upload files
+    dragUpload = dbc.Container([
+        html.H5(
+            'Step 4. Select or drag and drop the filled out csv file containing your data using the provided outline.',
+            id="Instructions"),
+
+        dcc.Upload(
+            id="upload-data",
+            children=[
+                "Drag and Drop or ",
+                html.A(children="Select a File"),
+            ],
+            style={
+                'width': '100%',
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            },
+
+            accept=".csv, .xls, .xlsx",
+        ),
+
+        dbc.Row([
+            HalsNamedInlineRadioItems(
+                name='Would you like to password protect this file? If so, users will not be able to download it from the data page.',
+                id="pw-protect",
+                options=data_Review_options,
+            ),
+            dcc.Input(
+                placeholder='Password',
+                type='password',
+                id='pw-protect-txt',
+                style={'display': 'none'}
+            ),
+        ]),
+
+        html.Div(id='upload-output'),
+    ], )
+
+    ## Step 5. Upload button and warning about using outline
+    uploadButton = dbc.Container([
+        html.H5('Step 5.  Click \'Upload\' to ''upload your data and information to the project.', id="Instructions"),
+
+        html.P(
+            '**Please note, the data must be in the same format as the outline file provided in step 3 above. Failure to use this '
+            'outline will likely return an error.**', style={'font-size': '1.5rem'}),
+
+        html.Button(id='upload-button', n_clicks=0, children='Upload',
+                    style={'margin': '1rem .5rem .6rem .5rem', 'justify': 'center'}),
+
+        dbc.Row(html.P(id='upload-msg')),
+    ], )
+
+    ## Combines all the questions/forms from above into one section, this is what's actually returned to the page
+    uploadBar = html.Div([
+        dbc.Col([
+            dbc.Row(html.H5(
+                "Thank you for your interest in contributing to our data collection! Please follow the 5 steps below to upload your file to our database.",
+                style={'textAlign': 'center'}), justify="center", form=True),
+            dbc.Row(html.A("Contact us with any questions, problems, or concerns!", href="/PageContact",
+                           className="mr-1", style={'textAlign': 'center', "padding": "2rem .5rem 2rem .5rem"}),
+                    justify="center", form=True),
+
+        ], className="twelve columns"),
+        dbc.Row(uploadDataInfo, className='pretty_container ten columns offset-by-one'),
+        dbc.Row(uploadMethodologies, className='pretty_container ten columns offset-by-one'),
+        dbc.Row([
+            dbc.Col(exampleBar, className="pretty_container five columns"),
+            dbc.Col(dragUpload, className="pretty_container five columns"),
+        ], className="ten columns offset-by-one"),
+        dbc.Row(uploadButton, className='pretty_container ten columns offset-by-one')
+    ], className="twelve columns")
+
+    layout = uploadBar
+    return layout
+
+"""
 uploadDataInfo = dbc.Container([
     html.H5('Step 1. Fill out the Data Source questionnaire below with appropriate information and links as needed.',
            id="Instructions"),
@@ -146,7 +437,7 @@ uploadDataInfo = dbc.Container([
     #### Identifying - Name, Institution, Database Name
     dbc.Row([
         html.Form([
-            dcc.Input(placeholder='Name', id='uploader-Name', type='text'),
+            dcc.Input(placeholder='Name', value = g.user.fullname, id='uploader-Name', type='text'),
             dcc.Input(placeholder='Institution', id='user-inst', type='text'),
             dcc.Input(placeholder='Database Name', id='db-name', type='text'),
         ]),
@@ -246,7 +537,11 @@ uploadDataInfo = dbc.Container([
     ]),
 ],)
 
+"""
 
+
+
+"""
 ## Step 2. Questions for Methodology Information
 uploadMethodologies = dbc.Container([
     html.H5('Step 2. Fill out the Methodology questionnaire below with appropriate information and links as needed.', id="Instructions"),
@@ -356,7 +651,7 @@ uploadBar=html.Div([
 
 
     dbc.Row([
-        dbc.Col(uploadDataInfo, className="pretty_container six columns"),
+        dbc.Col(uploadDataInfo(), className="pretty_container six columns"),
         dbc.Col(uploadMethodologies, className="pretty_container six columns"),
     ], className="twelve columns"),
 
@@ -386,6 +681,9 @@ uploadBar=html.Div([
     dbc.Row(uploadButton, className= 'pretty_container ten columns offset-by-one')
 ], className="twelve columns")
 
+
+
+"""
 
 
 

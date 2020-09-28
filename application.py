@@ -6,18 +6,17 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 from dash.dependencies import Input, Output
-from Layouts import About, Data, Contact, Upload #, Login
+from Layouts import About, Data, Contact#, Upload #, UserPage
 from navbar import NavBar
 import boto3
 import io
 from botocore.client import Config
 from app import app
 import os
-from s3References import session, client, usersNames
 from ViewFilteredData import filtersAvailable, FilteredView
 from Homepage import Homepage
-from LoginWithSessions import Login
-from flask import g
+from LoginWithSessions import Login, UserPage, uploadPage
+from flask import g, redirect, session
 
 
 """
@@ -66,13 +65,55 @@ def display_page(pathname):
         return Data()
     elif pathname == '/Contact':
         return Contact()
-    elif pathname == '/Login':
+    elif pathname == '/Login' and 'user_fullName' not in session:
         return Login()
-    elif pathname == '/Upload' and g.user:
-        return Upload()
+    elif pathname == '/Login' and 'user_fullName' in session:
+        return UserPage()
+    elif pathname == '/Logout':
+        return Login()
+    elif pathname == '/Upload' and 'user_fullName' in session:
+        return uploadPage()
+    elif pathname == '/Upload' and 'user_fullName' not in session:
+        return Login()
+    elif pathname == '/UserPage':
+        return UserPage()
     else:
         return Homepage()
 
+
+"""
+Sets the tab text based on the current URL; this code is javascript, not python, which is why it looks off
+"""
+
+app.clientside_callback(
+    """
+    function(pathname) {
+        if (pathname === '/Homepage') {
+            document.title = "Homepage - GLEON GMA Project"
+        } else if (pathname === '/') {
+            document.title = "Homepage - GLEON GMA Project"
+        } else if (pathname === '/FilterData') {
+            document.title = "Filter Graphs - GLEON GMA Project"
+        } else if (pathname === '/About') {
+            document.title = "About - GLEON GMA Project"
+        } else if (pathname === '/Data') {
+            document.title = "Data - GLEON GMA Project"
+        } else if (pathname === '/Contact') {
+            document.title = "Contact - GLEON GMA Project"
+        } else if (pathname === '/Login') {
+            document.title = "Login - GLEON GMA Project"
+        } else if (pathname === '/Upload') {
+            document.title = "Upload - GLEON GMA Project"
+        } else if (pathname === '/UserPage') {
+            document.title = "User's Page - GLEON GMA Project"
+        } else {
+            document.title = "Homepage - GLEON GMA Project"            
+        }
+    }
+    """,
+    Output('blank-output', 'children'),
+    [Input('url', 'pathname')]
+)
 
 
 """"
@@ -83,32 +124,34 @@ which page you are on
 """
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 7)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 8)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/Homepage":
-        return True, False, False, False, False, False
+        return True, False, False, False, False, False, False
     elif pathname == "/":
-        return True, False, False, False, False, False
+        return True, False, False, False, False, False, False
     elif pathname == "/About":
-        return False, True, False, False, False, False
+        return False, True, False, False, False, False, False
     elif pathname == "/FilterData":
-        return False, False, True, False, False, False
+        return False, False, True, False, False, False, False
     elif pathname == "/Data":
-        return False, False, False, True,  False, False
-    elif pathname == "/Contact":
-        return False, False, False, False, True, False
+        return False, False, False, True,  False, False, False
     elif pathname == "/Login":
-        return False, False, False, False, False, True
+        return False, False, False, False, False, True, False
+    elif pathname == "/UserPage":
+        return False, False, False, False, False, True, False
+    elif pathname == "/Upload":
+        return False, False, False, False, False, False, True
+    elif pathname == "/Contact":
+        return False, False, False, False, True, False, False
     else:
-        return False, False, False, False, False, False
+        return False, False, False, False, False, False, False, False
 
 
 
 
 if __name__ == '__main__':
     app.server.run(debug=True, threaded=True)
-
-
 

@@ -18,6 +18,12 @@ body {
   box-shadow: 2px 2px 2px lightgrey;
 }
 
+.separatingLine {
+  border-radius: 5px;
+  margin: .5rem;
+  padding: 1rem;
+  position: relative;
+}
 
 
 label,
