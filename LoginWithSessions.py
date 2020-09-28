@@ -1069,7 +1069,28 @@ refreshButton = html.Button(id='refresh-db-button', children='Refresh',
 
 
 ## Download Functionality
+@app.callback(
+    Output('download-link-UserSpecific', 'href'),
+    [Input('export-data-button-userSpecific', 'n_clicks')],
+    [State('metadata_table_userPage', 'derived_virtual_selected_rows'),
+     State('metadata_table_userPage', 'derived_virtual_data')])
+def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
+    if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
+        selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
 
+        try:
+            new_dataframe = pd.DataFrame()
+            # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
+            for row in selected_rows:
+                rowid = row["RefID"]
+                db_data = dfMasterData[dfMasterData['RefID'] == rowid]
+                new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
+            dff = new_dataframe
+            csv_string = dff.to_csv(index=False, encoding='utf-8')
+            csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
+            return csv_string
+        except Exception as e:
+            print("EXCEPTION: ", e)
 
 # need to figure this out; here is old code + a new function to download desired data from S3. need to figure out concat desired data
 @app.callback(
