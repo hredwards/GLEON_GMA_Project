@@ -1,3 +1,4 @@
+"""
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import db, bcrypt
 from registrationLogin import RegistrationForm, LoginForm
@@ -59,3 +60,4 @@ def logout():
 @login_required
 def account():
     return render_template('account.html', title='Account')
+    """
