@@ -1,0 +1,34 @@
+To do:
+
+1. Cut unnecessary code from repository
+2. 
+
+
+
+
+
+
+
+
+
+Notes:
+-Free heroku falls asleep
+    potential fixes:
+        - paid heroku 
+        - aws (paid)
+        - host at ku 
+        - host on a local machine (probably not viable)
+        - bot to 'tickle' heroku site to prevent it from falling asleep
+
+- Slow load times for site modules
+    potential fixes:
+        - move import statements around to lessen first load times
+        -
+
+
+-data not writing to aws bucket
+    potential fixes:
+        - switch to sql database (not ideal)
+        - change data upload code
+
+        test
