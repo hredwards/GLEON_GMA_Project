@@ -12,6 +12,16 @@ To do:
 
 
 Notes:
+
+-Heroku falls asleep after 30 mins of inactivity
+-free tier heroku has 2 types, unverified and verified
+    -verified means you have card details verified (gets you 1000 hours of activity per month)
+    -unverified 550 hours of dyno per month
+
+Uptime Robot potential fix to app falling asleep
+
+
+
 -Free heroku falls asleep
     potential fixes:
         - paid heroku 
