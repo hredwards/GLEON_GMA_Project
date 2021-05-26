@@ -30,5 +30,5 @@ Notes:
     potential fixes:
         - switch to sql database (not ideal)
         - change data upload code
-
-        test
+        -heroku postgresql (free option, probably viable)
+        -aws database (sql or postgresql)
