@@ -10,7 +10,7 @@ table_header = [
 ]
 
 row1 = html.Tr([html.Td("Dr. Ted Harris"), html.Td("GMA Project Lead"), html.Td("ted.daniel.harris@gmail.com")])
-row2 = html.Tr([html.Td("Data Science Student"), html.Td("Data Scientist/Web Interface Manager"), html.Td("gleon.gma@gmail.com")])
+row2 = html.Tr([html.Td("Dom D'Attilio"), html.Td("Data Scientist/Web Interface Manager"), html.Td("gleon.gma@gmail.com")])
 
 table_body = [html.Tbody([row1, row2])]
 
