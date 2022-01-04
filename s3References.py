@@ -46,7 +46,6 @@ MetadataDB = client.get_object(Bucket='gleongmabucket', Key='Assets/MetadataDB.c
 dfMetadataDB = pd.read_csv(io.BytesIO(MetadataDB['Body'].read()))
 
 sys.stdout.write(MasterData)
-sys.stdout.flush()
 
 ## Example Datasheet
 #exampleSheet = client.get_object(Bucket='gleongmabucket', Key='Assets/GLEON_GMA_Example.xlsx')
