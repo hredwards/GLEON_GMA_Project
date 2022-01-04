@@ -7,6 +7,7 @@ from dash.dependencies import Input, Output
 
 
 import boto3
+import logging
 import io
 from botocore.client import Config
 import pandas as pd
@@ -72,3 +73,9 @@ user_names = dfCreds["user"]
 creds = dict(zip(list(user_names), list(user_pwd)))
 usersNames = dfCreds["name"]
 userId = dfCreds["id"]
+
+
+
+logging.basicConfig(filename='testing.log', level=logging.DEBUG)
+logging.info('This is a test')
+logging.debug(dfMasterData)
