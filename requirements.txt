@@ -18,7 +18,7 @@ Click==7.0
 colorama==0.3.9
 configparser==4.0.2
 contextlib2==0.6.0.post1
-cryptography==2.6.1
+cryptography==3.3.2
 crypto==1.4.1
 dash==1.14.0
 dash_bootstrap_components==0.8.3
